@@ -322,7 +322,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			{
 				_string = s;
 				_builder = null;
-				Length = s.Length;
+				Length = s == null ? 0 : s.Length;
 			}
 
 			public CharacterSource(StringBuilder builder)
