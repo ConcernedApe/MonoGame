@@ -250,6 +250,22 @@ namespace Microsoft.Xna.Framework
             return value1.X != value2.X || value1.Y != value2.Y;
         }
 
+        /// <summary>
+        ///     Performs an implicit conversion from a <see cref="Point" /> to a <see cref="Vector2" />.
+        /// </summary>
+        /// <param name="point">The point.</param>
+        /// <returns>
+        ///     The resulting <see cref="Vector2" />.
+        /// </returns>
+        public static implicit operator Vector2(Point point)
+        {
+            return new Vector2
+            {
+                X = (int)point.X,
+                Y = (int)point.Y
+            };
+        }
+
         #endregion
 
         #region Public Methods
