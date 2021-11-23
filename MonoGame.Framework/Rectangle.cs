@@ -377,6 +377,19 @@ namespace Microsoft.Xna.Framework
         }
 
         /// <summary>
+        /// returns a new rectangle bsed off this one, but adjusted/inflated by the given amounts
+        /// </summary>
+        /// <param name="horizontalAmount"></param>
+        /// <param name="verticalAmount"></param>
+        /// <returns></returns>
+        public Rectangle InflatedCopy(float horizontalAmount, float verticalAmount)
+        {
+            Rectangle r = new Rectangle(X, Y, Width, Height);
+            r.Inflate(horizontalAmount, verticalAmount);
+            return r;
+        }
+
+        /// <summary>
         /// Gets whether or not the other <see cref="Rectangle"/> intersects with this rectangle.
         /// </summary>
         /// <param name="value">The other rectangle for testing.</param>
