@@ -93,6 +93,8 @@ namespace Microsoft.Xna.Framework
                 Threading.Run();
                 GraphicsDevice.DisposeContexts();
 
+                _view.ClearSuppressMoved();
+
                 if (_isExiting > 0)
                     break;
             }
@@ -232,8 +234,6 @@ namespace Microsoft.Xna.Framework
                         break;
                 }
             }
-
-            _view.ClearSuppressMoved();
         }
 
         private int UTF8ToUnicode(int utf8)
