@@ -269,6 +269,11 @@ namespace Microsoft.Xna.Framework
             IsFullScreen = _willBeFullScreen;
         }
 
+        public void SetSuppressMoved()
+        {
+            _supressMoved = true;
+        }
+
         // 12/1/2021 ARTHUR: It was possible that suppressMoved was set by EndScreenDeviceChange, but a subsequent move didn't occur, causing
         // the suppressMoved flag to suppress the next, valid move. We now clear out the flag at the end of the SDL tick.
         public void ClearSuppressMoved()
