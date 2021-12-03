@@ -90,7 +90,6 @@ namespace Microsoft.Xna.Framework
         private string _screenDeviceName;
         private int _width, _height;
         private bool _supressMoved;
-        private bool _handlingFullscreenDisplayChange = false;
 
         public SdlGameWindow(Game game)
         {
@@ -207,6 +206,9 @@ namespace Microsoft.Xna.Framework
 
         public override void EndScreenDeviceChange(string screenDeviceName, int clientWidth, int clientHeight)
         {
+            // Suppress the move detection before applying any changes to the window.
+            _supressMoved = true;
+
             _screenDeviceName = screenDeviceName;
 
             var prevBounds = ClientBounds;
@@ -244,8 +246,6 @@ namespace Microsoft.Xna.Framework
 
             var centerX = Math.Max(prevBounds.X + ((prevBounds.Width - clientWidth) / 2), minx);
             var centerY = Math.Max(prevBounds.Y + ((prevBounds.Height - clientHeight) / 2), miny);
-
-            _supressMoved = true;
 
             if (IsFullScreen && !_willBeFullScreen)
             {
@@ -316,15 +316,11 @@ namespace Microsoft.Xna.Framework
 
                 _supressMoved = true;
 
-                _handlingFullscreenDisplayChange = true;
-
                 Sdl.Window.SetFullscreen(Handle, 0); // Set to windowed.
                 Sdl.Window.SetPosition(Handle, x, y); // Move the window (updating the Display index associated with the Window)
 
                 // Set the fullscreen flag using the same logic as in EndScreenDeviceChange.
                 var fullscreenFlag = _game.graphicsDeviceManager.HardwareModeSwitch ? Sdl.Window.State.Fullscreen : Sdl.Window.State.FullscreenDesktop;
-
-                _handlingFullscreenDisplayChange = false;
 
                 Sdl.Window.SetFullscreen(Handle, (_willBeFullScreen) ? fullscreenFlag : 0);
             }
