@@ -300,15 +300,12 @@ namespace Microsoft.Xna.Framework
         {
             if (_supressMoved)
             {
-                Console.WriteLine("Suppressed move.");
                 // Note we no longer unset _suppressedMoved -- it is done automatically after all SDL events are processed.
                 return;
             }
 
             if (IsFullScreen)
             {
-                Console.WriteLine("Refreshing from fullscreen window move.");
-
                 // HACK: 12/1/2021 ARTHUR: When switching monitors using Windows Key + Left/Right Arrow,
                 // SDL doesn't seem to update the display the Window is centered on. Therefore, we use this hack
                 // to unset fullscreen mode, move the position of the window (which updates the display index)
