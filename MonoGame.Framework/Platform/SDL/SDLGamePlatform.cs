@@ -212,6 +212,8 @@ namespace Microsoft.Xna.Framework
                         break;
                     case Sdl.EventType.WindowEvent:
 
+                        Console.WriteLine(ev.Window.EventID);
+
                         switch (ev.Window.EventID)
                         {
                             case Sdl.Window.EventId.Resized:

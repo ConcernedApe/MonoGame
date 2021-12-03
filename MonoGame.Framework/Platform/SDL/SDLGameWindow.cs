@@ -90,6 +90,7 @@ namespace Microsoft.Xna.Framework
         private string _screenDeviceName;
         private int _width, _height;
         private bool _supressMoved;
+        private bool _handlingFullscreenDisplayChange = false;
 
         public SdlGameWindow(Game game)
         {
@@ -258,8 +259,15 @@ namespace Microsoft.Xna.Framework
 
                             Sdl.Window.SetPosition(Handle, centerX, centerY);
 
-            if (IsFullScreen != _willBeFullScreen)
-                OnClientSizeChanged();
+            if (!_handlingFullscreenDisplayChange)
+            {
+                Console.Write("EndScreenDeviceChange Client Size Change");
+
+                if (IsFullScreen != _willBeFullScreen)
+                {
+                    OnClientSizeChanged();
+                }
+            }
 
             IsFullScreen = _willBeFullScreen;
 
@@ -297,12 +305,15 @@ namespace Microsoft.Xna.Framework
         {
             if (_supressMoved)
             {
+                Console.WriteLine("Suppressed move.");
                 // Note we no longer unset _suppressedMoved -- it is done automatically after all SDL events are processed.
                 return;
             }
 
             if (IsFullScreen)
             {
+                Console.WriteLine("Refreshing from fullscreen window move.");
+
                 // HACK: 12/1/2021 ARTHUR: When switching monitors using Windows Key + Left/Right Arrow,
                 // SDL doesn't seem to update the display the Window is centered on. Therefore, we use this hack
                 // to unset fullscreen mode, move the position of the window (which updates the display index)
@@ -310,11 +321,16 @@ namespace Microsoft.Xna.Framework
 
                 _supressMoved = true;
 
+                _handlingFullscreenDisplayChange = true;
+
                 Sdl.Window.SetFullscreen(Handle, 0); // Set to windowed.
                 Sdl.Window.SetPosition(Handle, x, y); // Move the window (updating the Display index associated with the Window)
 
                 // Set the fullscreen flag using the same logic as in EndScreenDeviceChange.
                 var fullscreenFlag = _game.graphicsDeviceManager.HardwareModeSwitch ? Sdl.Window.State.Fullscreen : Sdl.Window.State.FullscreenDesktop;
+
+                _handlingFullscreenDisplayChange = false;
+
                 Sdl.Window.SetFullscreen(Handle, (_willBeFullScreen) ? fullscreenFlag : 0);
             }
         }
@@ -333,7 +349,12 @@ namespace Microsoft.Xna.Framework
 
             Sdl.Window.GetSize(Handle, out _width, out _height);
 
-            OnClientSizeChanged();
+            if (!_handlingFullscreenDisplayChange)
+			{
+                Console.Write("Client Resize Client Size Change");
+                OnClientSizeChanged();
+            }
+            
         }
 
         protected internal override void SetSupportedOrientations(DisplayOrientation orientations)
