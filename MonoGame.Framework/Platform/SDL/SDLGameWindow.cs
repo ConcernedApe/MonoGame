@@ -245,6 +245,8 @@ namespace Microsoft.Xna.Framework
             var centerX = Math.Max(prevBounds.X + ((prevBounds.Width - clientWidth) / 2), minx);
             var centerY = Math.Max(prevBounds.Y + ((prevBounds.Height - clientHeight) / 2), miny);
 
+            _supressMoved = true;
+
             if (IsFullScreen && !_willBeFullScreen)
             {
                 // We need to get the display information again in case
@@ -257,21 +259,14 @@ namespace Microsoft.Xna.Framework
                 centerY = displayRect.Y + displayRect.Height / 2 - clientHeight / 2;
             }
 
-                            Sdl.Window.SetPosition(Handle, centerX, centerY);
+            Sdl.Window.SetPosition(Handle, centerX, centerY);
 
-            if (!_handlingFullscreenDisplayChange)
+            if (IsFullScreen != _willBeFullScreen)
             {
-                Console.Write("EndScreenDeviceChange Client Size Change");
-
-                if (IsFullScreen != _willBeFullScreen)
-                {
-                    OnClientSizeChanged();
-                }
+                OnClientSizeChanged();
             }
 
             IsFullScreen = _willBeFullScreen;
-
-            _supressMoved = true;
         }
 
         // 12/1/2021 ARTHUR: It was possible that suppressMoved was set by EndScreenDeviceChange, but a subsequent move didn't occur, causing
@@ -349,12 +344,7 @@ namespace Microsoft.Xna.Framework
 
             Sdl.Window.GetSize(Handle, out _width, out _height);
 
-            if (!_handlingFullscreenDisplayChange)
-			{
-                Console.Write("Client Resize Client Size Change");
-                OnClientSizeChanged();
-            }
-            
+            OnClientSizeChanged();
         }
 
         protected internal override void SetSupportedOrientations(DisplayOrientation orientations)
