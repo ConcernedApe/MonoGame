@@ -93,8 +93,6 @@ namespace Microsoft.Xna.Framework
                 Threading.Run();
                 GraphicsDevice.DisposeContexts();
 
-                _view.ClearSuppressMoved();
-
                 if (_isExiting > 0)
                     break;
             }
@@ -138,23 +136,23 @@ namespace Microsoft.Xna.Framework
                         //Window.MouseState.Y = ev.Motion.Y;
                         break;
                     case Sdl.EventType.KeyDown:
-                    {
-                        var key = KeyboardUtil.ToXna(ev.Key.Keysym.Sym);
-                        if (!_keys.Contains(key))
-                            _keys.Add(key);
-                        char character = (char)ev.Key.Keysym.Sym;
-                        _view.OnKeyDown(new InputKeyEventArgs(key));
-                        if (char.IsControl(character))
-                            _view.OnTextInput(new TextInputEventArgs(character, key));
-                        break;
-                    }
+                        {
+                            var key = KeyboardUtil.ToXna(ev.Key.Keysym.Sym);
+                            if (!_keys.Contains(key))
+                                _keys.Add(key);
+                            char character = (char)ev.Key.Keysym.Sym;
+                            _view.OnKeyDown(new InputKeyEventArgs(key));
+                            if (char.IsControl(character))
+                                _view.OnTextInput(new TextInputEventArgs(character, key));
+                            break;
+                        }
                     case Sdl.EventType.KeyUp:
-                    {
-                        var key = KeyboardUtil.ToXna(ev.Key.Keysym.Sym);
-                        _keys.Remove(key);
-                        _view.OnKeyUp(new InputKeyEventArgs(key));
-                        break;
-                    }
+                        {
+                            var key = KeyboardUtil.ToXna(ev.Key.Keysym.Sym);
+                            _keys.Remove(key);
+                            _view.OnKeyUp(new InputKeyEventArgs(key));
+                            break;
+                        }
                     case Sdl.EventType.TextInput:
                         if (_view.IsTextInputHandled)
                         {
@@ -211,6 +209,7 @@ namespace Microsoft.Xna.Framework
                         }
                         break;
                     case Sdl.EventType.WindowEvent:
+
                         switch (ev.Window.EventID)
                         {
                             case Sdl.Window.EventId.Resized:
@@ -224,7 +223,7 @@ namespace Microsoft.Xna.Framework
                                 IsActive = false;
                                 break;
                             case Sdl.Window.EventId.Moved:
-                                _view.Moved(ev.Window.Data1, ev.Window.Data2);
+                                _view.Moved();
                                 break;
                             case Sdl.Window.EventId.Close:
                                 _isExiting++;
