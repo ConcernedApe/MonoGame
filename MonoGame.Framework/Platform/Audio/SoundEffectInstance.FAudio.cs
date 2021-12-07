@@ -162,6 +162,9 @@ namespace Microsoft.Xna.Framework.Audio
                 _filterDirty = false;
                 _filterEnabled = false;
 
+                // Unflagging the isXact flag is required for returning the sound effect back to the pool.
+                _isXAct = false;
+
 				if (_isDynamic)
 				{
 					/*
