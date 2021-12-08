@@ -350,6 +350,9 @@ namespace Microsoft.Xna.Framework.Audio
             if (_soundEffect != null)
             {
                 _soundEffect.Stop(true);
+
+                // This flag must be unset, or else the sound effect will not be pooled correctly.
+                _soundEffect._isXAct = false;
                 _soundEffect = null;
             }
 
@@ -405,6 +408,9 @@ namespace Microsoft.Xna.Framework.Audio
                 if (_soundEffect != null)
                 {
                     _soundEffect.Stop(options == AudioStopOptions.Immediate);
+
+                    // This flag must be unset, or else the sound effect will not be pooled correctly.
+                    _soundEffect._isXAct = false;
                     _soundEffect = null;
                 }
             }
