@@ -283,6 +283,26 @@ namespace Microsoft.Xna.Framework
             _wasMoved = true;
         }
 
+        public override int GetDisplayIndex()
+        {
+            return Sdl.Display.GetWindowDisplayIndex(_handle);
+        }
+
+        public override bool CenterOnDisplay(int index)
+        {
+            if (index >= 0 && index < Sdl.Display.GetNumVideoDisplays())
+            {
+                Sdl.Rectangle rect;
+                Sdl.Display.GetBounds(index, out rect);
+
+                Position = new Point(rect.X + rect.Width / 2 - ClientBounds.Width / 2, rect.Y + rect.Height / 2 - ClientBounds.Height / 2);
+
+                return true;
+            }
+
+            return false;
+        }
+
         public void ClientResize(int width, int height)
         {
             // SDL reports many resize events even if the Size didn't change.

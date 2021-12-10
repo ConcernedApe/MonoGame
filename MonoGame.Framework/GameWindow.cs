@@ -61,6 +61,10 @@ namespace Microsoft.Xna.Framework
 	    /// </summary>
 		public abstract string ScreenDeviceName { get; }
 
+        public abstract bool CenterOnDisplay(int index);
+
+        public abstract int GetDisplayIndex();
+
 		private string _title;
         /// <summary>
         /// Gets or sets the title of the game window.
