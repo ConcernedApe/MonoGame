@@ -223,7 +223,7 @@ namespace Microsoft.Xna.Framework
                                 IsActive = false;
                                 break;
                             case Sdl.Window.EventId.Moved:
-                                _view.Moved();
+                                _view.Moved(ev.Window.Data1, ev.Window.Data2);
                                 break;
                             case Sdl.Window.EventId.Close:
                                 _isExiting++;
@@ -232,6 +232,8 @@ namespace Microsoft.Xna.Framework
                         break;
                 }
             }
+
+            _view.OnEventsHandled();
         }
 
         private int UTF8ToUnicode(int utf8)
