@@ -261,12 +261,11 @@ namespace Microsoft.Xna.Framework
             // after the window gets resized, window position information
             // becomes wrong (for me it always returned 10 8). Solution is
             // to not try and set the window position because it will be wrong.
-            if ((Sdl.Patch > 4 || !AllowUserResizing) && !_wasMoved)
+            if ((Sdl.Patch > 4 || !AllowUserResizing))
                 Sdl.Window.SetPosition(Handle, centerX, centerY);
 
             if (IsFullScreen != _willBeFullScreen)
             {
-                Console.WriteLine("FULLSCREEN");
                 OnClientSizeChanged();
             }
 
@@ -313,6 +312,19 @@ namespace Microsoft.Xna.Framework
                     // Set the fullscreen flag using the same logic as in EndScreenDeviceChange.
                     var fullscreenFlag = _game.graphicsDeviceManager.HardwareModeSwitch ? Sdl.Window.State.Fullscreen : Sdl.Window.State.FullscreenDesktop;
                     Sdl.Window.SetFullscreen(Handle, fullscreenFlag);
+
+                    // HACK: On Linux, this seems to be required when switching screens in borderless fullscreen mode, or else when using mixed resolutions, the client bounds will
+                    // be set to the source display's resolution.
+
+                    if (fullscreenFlag == Sdl.Window.State.FullscreenDesktop && display >= 0)
+                    {
+                        Sdl.Rectangle new_display_bounds;
+
+                        Sdl.Display.GetBounds(display, out new_display_bounds);
+
+                        _game.graphicsDeviceManager.PreferredBackBufferWidth = new_display_bounds.Width;
+                        _game.graphicsDeviceManager.PreferredBackBufferHeight = new_display_bounds.Height;
+                    }
                 }
                 return;
             }
@@ -366,7 +378,6 @@ namespace Microsoft.Xna.Framework
 
             Sdl.Window.GetSize(Handle, out _width, out _height);
 
-            Console.WriteLine("Client resize");
             OnClientSizeChanged();
         }
 
