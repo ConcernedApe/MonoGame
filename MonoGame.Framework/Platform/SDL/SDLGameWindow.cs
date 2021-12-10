@@ -265,7 +265,10 @@ namespace Microsoft.Xna.Framework
                 Sdl.Window.SetPosition(Handle, centerX, centerY);
 
             if (IsFullScreen != _willBeFullScreen)
+            {
+                Console.WriteLine("FULLSCREEN");
                 OnClientSizeChanged();
+            }
 
             IsFullScreen = _willBeFullScreen;
 
@@ -278,19 +281,39 @@ namespace Microsoft.Xna.Framework
         {
             if (IsFullScreen && !_applyingFullScreenMove)
             {
-                _applyingFullScreenMove = true;
+                int display = -1;
 
-                // HACK: 12/1/2021 ARTHUR: When switching monitors using Windows Key + Left/Right Arrow,
-                // SDL doesn't seem to update the display the Window is centered on. Therefore, we use this hack
-                // to unset fullscreen mode, move the position of the window (which updates the display index)
-                // and then re-set fullscreen.
+                Sdl.Rectangle rect;
 
-                Sdl.Window.SetFullscreen(Handle, 0); // Set to windowed.
-                Sdl.Window.SetPosition(Handle, x, y); // Move the window (updating the Display index associated with the Window)
+                // Try to find the display we're moving onto.
+                for (int i = 0; i < Sdl.Display.GetNumVideoDisplays(); i++)
+                {
+                    Sdl.Display.GetBounds(i, out rect);
 
-                // Set the fullscreen flag using the same logic as in EndScreenDeviceChange.
-                var fullscreenFlag = _game.graphicsDeviceManager.HardwareModeSwitch ? Sdl.Window.State.Fullscreen : Sdl.Window.State.FullscreenDesktop;
-                Sdl.Window.SetFullscreen(Handle, (_willBeFullScreen) ? fullscreenFlag : 0);
+                    if (x >= rect.X && x < rect.X + rect.Width &&
+                        y >= rect.Y && y < rect.Y + rect.Height)
+                    {
+                        display = i;
+                        break;
+                    }
+                }
+
+                if (GetDisplayIndex() != display)
+                {
+                    _applyingFullScreenMove = true;
+
+                    // HACK: 12/1/2021 ARTHUR: When switching monitors using Windows Key + Left/Right Arrow,
+                    // SDL doesn't seem to update the display the Window is centered on. Therefore, we use this hack
+                    // to unset fullscreen mode, move the position of the window (which updates the display index)
+                    // and then re-set fullscreen.
+
+                    Sdl.Window.SetFullscreen(Handle, 0); // Set to windowed.
+                    Sdl.Window.SetPosition(Handle, x, y); // Move the window (updating the Display index associated with the Window)
+
+                    // Set the fullscreen flag using the same logic as in EndScreenDeviceChange.
+                    var fullscreenFlag = _game.graphicsDeviceManager.HardwareModeSwitch ? Sdl.Window.State.Fullscreen : Sdl.Window.State.FullscreenDesktop;
+                    Sdl.Window.SetFullscreen(Handle, fullscreenFlag);
+                }
                 return;
             }
 
@@ -343,6 +366,7 @@ namespace Microsoft.Xna.Framework
 
             Sdl.Window.GetSize(Handle, out _width, out _height);
 
+            Console.WriteLine("Client resize");
             OnClientSizeChanged();
         }
 
