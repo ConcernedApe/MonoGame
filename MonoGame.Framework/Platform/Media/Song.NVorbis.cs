@@ -15,6 +15,19 @@ namespace Microsoft.Xna.Framework.Media
         private float _volume = 1f;
         private readonly object _sourceMutex = new object();
 
+        // 12/10/2021 ARTHUR: Expose this property so that we can use looped Songs without going through MediaPlayer.
+        public bool IsLooped
+        {
+            get
+            {
+                return stream.IsLooped;
+            }
+            set
+            {
+                stream.IsLooped = value;
+            }
+        }
+
         private void PlatformInitialize(string fileName)
         {
             // init OpenAL if need be
@@ -45,7 +58,7 @@ namespace Microsoft.Xna.Framework.Media
             }
         }
 
-        internal void Play(TimeSpan? startPosition)
+        public void Play(TimeSpan? startPosition)
         {
             if (stream == null)
                 return;
@@ -57,7 +70,7 @@ namespace Microsoft.Xna.Framework.Media
             _playCount++;
         }
 
-        internal void Resume()
+        public void Resume()
         {
             if (stream == null)
                 return;
@@ -65,7 +78,7 @@ namespace Microsoft.Xna.Framework.Media
             stream.Resume();
         }
 
-        internal void Pause()
+        public void Pause()
         {
             if (stream == null)
                 return;
@@ -73,7 +86,7 @@ namespace Microsoft.Xna.Framework.Media
             stream.Pause();
         }
 
-        internal void Stop()
+        public void Stop()
         {
             if (stream == null)
                 return;
@@ -82,7 +95,7 @@ namespace Microsoft.Xna.Framework.Media
             _playCount = 0;
         }
 
-        internal float Volume
+        public float Volume
         {
             get
             {

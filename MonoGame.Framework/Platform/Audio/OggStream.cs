@@ -448,6 +448,12 @@ namespace Microsoft.Xna.Framework.Audio
                                 {
                                     stream.Close();
                                     stream.Open();
+
+                                    // 12/10/2021 ARTHUR: I don't know enough about OpenAL to know if this does what I think it does, but it seems to work. The intent here is to
+                                    // fill out the remainder of this buffer with the audio from the beginning of the stream.
+                                    finished = false;
+
+                                    FillBuffer(stream, tempBuffers[i]);
                                 }
                                 else
                                 {

@@ -57,7 +57,7 @@ namespace Microsoft.Xna.Framework.Media
             _duration = TimeSpan.FromMilliseconds(durationMS);
         }
 
-		internal Song(string fileName)
+        public Song(string fileName)
 		{			
 			_name = fileName;
 
