@@ -37,6 +37,8 @@ namespace Microsoft.Xna.Framework.Graphics
         /// </summary>
         public static float TextureTuckAmount = 0.0F;
 
+        public static Matrix? globalMatrix;
+
         private void _TuckTextureCoordinates(Texture2D texture, ref Vector2 tl, ref Vector2 br)
         {
             tl.X += TextureTuckAmount * texture.TexelWidth;
@@ -112,7 +114,20 @@ namespace Microsoft.Xna.Framework.Graphics
             _depthStencilState = depthStencilState ?? DepthStencilState.None;
             _rasterizerState = rasterizerState ?? RasterizerState.CullCounterClockwise;
             _effect = effect;
+
             _spriteEffect.TransformMatrix = transformMatrix;
+
+            if (globalMatrix != null)
+            {
+                if (_spriteEffect.TransformMatrix == null)
+                {
+                    _spriteEffect.TransformMatrix = globalMatrix;
+                }
+                else
+                {
+                    _spriteEffect.TransformMatrix = globalMatrix * _spriteEffect.TransformMatrix;
+                }
+            }
 
             // Setup things now so a user can change them.
             if (sortMode == SpriteSortMode.Immediate)
