@@ -242,8 +242,12 @@ namespace Microsoft.Xna.Framework
             int ignore, minx = 0, miny = 0;
             Sdl.Window.GetBorderSize(_handle, out miny, out minx, out ignore, out ignore);
 
-            var centerX = Math.Max(prevBounds.X + ((prevBounds.Width - clientWidth) / 2), minx);
-            var centerY = Math.Max(prevBounds.Y + ((prevBounds.Height - clientHeight) / 2), miny);
+            // 12/22/2021 ARTHUR: Previously this was only checking minx/miny and not taking into consideration the upper left coordinate of the display
+            // it's centering on, which was causing configurations where the secondary monitor is to the left/above the first could, in certain system
+            // configurations, preventing the window from being moved onto those monitors. We now add the upper left pixel value to minx and miny.
+
+            var centerX = Math.Max(prevBounds.X + ((prevBounds.Width - clientWidth) / 2), minx + displayRect.X);
+            var centerY = Math.Max(prevBounds.Y + ((prevBounds.Height - clientHeight) / 2), miny + displayRect.Y);
 
             if (IsFullScreen && !_willBeFullScreen)
             {
