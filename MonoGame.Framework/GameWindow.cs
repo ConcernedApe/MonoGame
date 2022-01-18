@@ -61,6 +61,8 @@ namespace Microsoft.Xna.Framework
 	    /// </summary>
 		public abstract string ScreenDeviceName { get; }
 
+        public abstract Rectangle GetDisplayBounds(int index);
+
         public abstract bool CenterOnDisplay(int index);
 
         public abstract int GetDisplayIndex();

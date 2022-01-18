@@ -352,6 +352,19 @@ namespace Microsoft.Xna.Framework
             return Sdl.Display.GetWindowDisplayIndex(_handle);
         }
 
+        public override Rectangle GetDisplayBounds(int index)
+        {
+            if (index >= 0 && index < Sdl.Display.GetNumVideoDisplays())
+            {
+                Sdl.Rectangle rect;
+                Sdl.Display.GetBounds(index, out rect);
+
+                return new Rectangle(rect.X, rect.Y, rect.Width, rect.Height);
+            }
+
+            return Rectangle.Empty;
+        }
+
         public override bool CenterOnDisplay(int index)
         {
             if (index >= 0 && index < Sdl.Display.GetNumVideoDisplays())
