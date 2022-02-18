@@ -396,6 +396,41 @@ namespace Microsoft.Xna.Framework.Graphics
             GL.BindTexture(TextureTarget.Texture2D, prev);
         }
 
+        public void CopyFromTexture(Texture2D other)
+        {
+            width = other.width;
+            height = other.height;
+
+            this.TexelWidth = other.TexelWidth;
+            this.TexelHeight = other.TexelHeight;
+            this._format = other._format;
+            this._levelCount = other._levelCount;
+
+            Threading.BlockOnUIThread(() =>
+            {
+                // Create a new GL texture.
+                DeleteGLTexture();
+                PlatformConstruct(other.width, other.height, other.LevelCount > 1, other.Format, SurfaceType.Texture, false);
+
+                int fbo = -1;
+                GL.GenFramebuffers(1, out fbo);
+                GL.BindFramebuffer(FramebufferTarget.Framebuffer, fbo);
+
+                GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, glTexture, 0);
+                GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, (FramebufferAttachment)0x8CE1 /*ColorAttachment1*/, TextureTarget.Texture2D, other.glTexture, 0);
+
+                // Assign the read and write buffers.
+                GL.ReadBuffer((ReadBufferMode)0x8CE1 /*ColorAttachment1*/);
+                GL.DrawBuffer(DrawBufferMode.ColorAttachment0);
+
+                // Blit the read buffer onto the write buffer.
+                GL.BlitFramebuffer(0, 0, width, height, 0, 0, width, height, ClearBufferMask.ColorBufferBit, BlitFramebufferFilter.Nearest);
+                GL.DeleteFramebuffers(1, ref fbo);
+
+                GraphicsExtensions.CheckGLError();
+            });
+        }
+
         private void GenerateGLTextureIfRequired()
         {
             if (this.glTexture < 0)

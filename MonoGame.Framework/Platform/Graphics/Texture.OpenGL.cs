@@ -33,7 +33,7 @@ namespace Microsoft.Xna.Framework.Graphics
             base.Dispose(disposing);
         }
 
-        private void DeleteGLTexture()
+        protected void DeleteGLTexture()
         {
             if (glTexture > 0)
             {
