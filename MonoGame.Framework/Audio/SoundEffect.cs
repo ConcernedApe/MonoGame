@@ -7,31 +7,109 @@ using System.IO;
 
 namespace Microsoft.Xna.Framework.Audio
 {
+    // Extremely hacky: Wraps an OggStream and returns its DynamicSoundEffectInstance.
+    // Note: OggStreamSoundEffect piggy backs off of DynamicSoundEffectInstance's logic and does not support pooling.
+    public class OggStreamSoundEffect : SoundEffect
+    {
+        protected OggStream _oggStream;
+
+        // OggStreamSoundEffect should only ever return one instance.
+        protected bool _returnedInstance = false;
+
+        public OggStreamSoundEffect(string filename)
+        {
+            _oggStream = new OggStream(filename);
+            _oggStream.Prepare();
+            _duration = _oggStream.Reader.TotalTime;
+        }
+
+        public override SoundEffectInstance GetPooledInstance(bool forXAct)
+        {
+            if (_returnedInstance)
+            {
+                return null;
+            }
+
+            _oggStream.Stop();
+            var instance = _oggStream.GetSoundEffectInstance();
+
+            instance._isXAct = forXAct;
+
+            _oggStream.SubmitBuffer();
+
+            return instance;
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (!_isDisposed)
+            {
+                _oggStream.Dispose();
+            }
+
+            _returnedInstance = false;
+
+            base.Dispose(disposing);
+        }
+    }
+
     /// <summary>Represents a loaded sound resource.</summary>
     /// <remarks>
     /// <para>A SoundEffect represents the buffer used to hold audio data and metadata. SoundEffectInstances are used to play from SoundEffects. Multiple SoundEffectInstance objects can be created and played from the same SoundEffect object.</para>
     /// <para>The only limit on the number of loaded SoundEffects is restricted by available memory. When a SoundEffect is disposed, all SoundEffectInstances created from it will become invalid.</para>
     /// <para>SoundEffect.Play() can be used for 'fire and forget' sounds. If advanced playback controls like volume or pitch is required, use SoundEffect.CreateInstance().</para>
     /// </remarks>
-    public sealed partial class SoundEffect : IDisposable
+    public partial class SoundEffect : IDisposable
     {
         #region Internal Audio Data
 
         private string _name = string.Empty;
         
-        private bool _isDisposed = false;
-        private readonly TimeSpan _duration;
+        protected bool _isDisposed = false;
+        protected TimeSpan _duration;
 
         #endregion
 
         #region Internal Constructors
 
-        // Only used from SoundEffect.FromStream.
-        private SoundEffect(Stream stream)
+        internal SoundEffect()
         {
             Initialize();
             if (_systemState != SoundSystemState.Initialized)
                 throw new NoAudioHardwareException("Audio has failed to initialize. Call SoundEffect.Initialize() before sound operation to get more specific errors.");
+        }
+
+        // Only used from SoundEffect.FromStream.
+        internal SoundEffect(Stream stream, bool vorbis = false)
+        {
+            Initialize();
+            if (_systemState != SoundSystemState.Initialized)
+                throw new NoAudioHardwareException("Audio has failed to initialize. Call SoundEffect.Initialize() before sound operation to get more specific errors.");
+
+            if (vorbis)
+            {
+                // Decompress Ogg Vorbis as PCM and load into memory.
+                using (NVorbis.VorbisReader vorbis_reader = new NVorbis.VorbisReader(stream, true))
+                {
+                    // TODO: Optimize this? Seems kind of wasteful to need three arrays to cast the data to the format it needs to be in.
+
+                    int bytes_per_sample = 2;
+
+                    float[] float_buffer = new float[vorbis_reader.TotalSamples * vorbis_reader.Channels];
+                    short[] cast_buffer = new short[float_buffer.Length];
+                    byte[] xna_buffer = new byte[float_buffer.Length * bytes_per_sample];
+
+                    int read_samples = vorbis_reader.ReadSamples(float_buffer, 0, (int)float_buffer.Length);
+
+                    OggStream.CastBuffer(float_buffer, cast_buffer, read_samples);
+                    Buffer.BlockCopy(cast_buffer, 0, xna_buffer, 0, read_samples * bytes_per_sample);
+
+                    _duration = vorbis_reader.TotalTime;
+
+                    PlatformInitializePcm(xna_buffer, 0, xna_buffer.Length, 16, vorbis_reader.SampleRate, (AudioChannels)vorbis_reader.Channels, 0, xna_buffer.Length);
+                    return;
+                }
+            }
 
             /*
               The Stream object must point to the head of a valid PCM wave file. Also, this wave file must be in the RIFF bitstream format.
@@ -263,12 +341,12 @@ namespace Microsoft.Xna.Framework.Audio
         /// </item>
         /// </list>
         /// </remarks>
-        public static SoundEffect FromStream(Stream stream)
+        public static SoundEffect FromStream(Stream stream, bool vorbis = false)
         {
             if (stream == null)
                 throw new ArgumentNullException("stream");
 
-            return new SoundEffect(stream);
+            return new SoundEffect(stream, vorbis);
         }
 
         /// <summary>
@@ -378,7 +456,7 @@ namespace Microsoft.Xna.Framework.Audio
         /// <summary>
         /// Returns a sound effect instance from the pool or null if none are available.
         /// </summary>
-        internal SoundEffectInstance GetPooledInstance(bool forXAct)
+        public virtual SoundEffectInstance GetPooledInstance(bool forXAct)
         {
             if (!SoundEffectInstancePool.SoundsAvailable)
                 return null;
@@ -517,7 +595,7 @@ namespace Microsoft.Xna.Framework.Audio
         /// required.  If the disposing parameter is false, Dispose was called by the finalizer and
         /// no managed objects should be touched because we do not know if they are still valid or
         /// not at that time.  Unmanaged resources should always be released.</remarks>
-        void Dispose(bool disposing)
+        protected virtual void Dispose(bool disposing)
         {
             if (!_isDisposed)
             {

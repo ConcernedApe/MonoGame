@@ -145,17 +145,16 @@ namespace Microsoft.Xna.Framework.Audio
 
 		private void PlatformStop(bool immediate)
 		{
-			if (handle == IntPtr.Zero)
-			{
-				return;
-			}
-
 			if (immediate)
 			{
-				FAudio.FAudioSourceVoice_Stop(handle, 0, 0);
-				FAudio.FAudioSourceVoice_FlushSourceBuffers(handle);
-				FAudio.FAudioVoice_DestroyVoice(handle);
-				handle = IntPtr.Zero;
+                if (handle != IntPtr.Zero)
+                {
+                    FAudio.FAudioSourceVoice_Stop(handle, 0, 0);
+                    FAudio.FAudioSourceVoice_FlushSourceBuffers(handle);
+                    FAudio.FAudioVoice_DestroyVoice(handle);
+                    handle = IntPtr.Zero;
+                }
+
 				usingReverb = false;
 				_state = SoundState.Stopped;
                 hasStarted = false;
@@ -164,14 +163,6 @@ namespace Microsoft.Xna.Framework.Audio
 
 				if (_isDynamic)
 				{
-					/*
-					lock (FrameworkDispatcher.Streams)
-					{
-						FrameworkDispatcher.Streams.Remove(
-							this as DynamicSoundEffectInstance
-						);
-					}
-					*/
 					(this as DynamicSoundEffectInstance).ClearBuffers();
 				}
 			}
@@ -181,7 +172,11 @@ namespace Microsoft.Xna.Framework.Audio
 				{
 					throw new InvalidOperationException();
 				}
-				FAudio.FAudioSourceVoice_ExitLoop(handle, 0);
+
+                if (handle != IntPtr.Zero)
+                {
+                    FAudio.FAudioSourceVoice_ExitLoop(handle, 0);
+                }
 			}
 		}
 

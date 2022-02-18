@@ -10,26 +10,30 @@ namespace Microsoft.Xna.Framework.Audio
     /// <summary>
     /// A <see cref="SoundEffectInstance"/> for which the audio buffer is provided by the game at run time.
     /// </summary>
-    public sealed partial class DynamicSoundEffectInstance : SoundEffectInstance
+    public partial class DynamicSoundEffectInstance : SoundEffectInstance
     {
         #region Public Properties
 
+        // This flag doesn't actually do anything, but should indicate to the DynamicSoundEffect's data provider that the audio should loop.
+        protected bool _shouldLoop = false;
+
         /// <summary>
-        /// This value has no effect on DynamicSoundEffectInstance.
-        /// It may not be set.
+        /// This value has no effect on DynamicSoundEffectInstance, but can be used by the sound effect's data provider to handle looping.
         /// </summary>
         public override bool IsLooped
         {
             get
             {
-                return false;
+                return _shouldLoop;
             }
 
             set
             {
+                _shouldLoop = value;
+                /*
                 AssertNotDisposed();
                 if (value == true)
-                    throw new InvalidOperationException("IsLooped cannot be set true. Submit looped audio data to implement looping.");
+                    throw new InvalidOperationException("IsLooped cannot be set true. Submit looped audio data to implement looping.");*/
             }
         }
 
@@ -284,7 +288,7 @@ namespace Microsoft.Xna.Framework.Audio
         private void CheckBufferCount()
         {
             if ((PendingBufferCount < TargetPendingBufferCount) && (_state == SoundState.Playing))
-                _buffersNeeded++;
+                _buffersNeeded = TargetPendingBufferCount - PendingBufferCount;
         }
 
         internal void UpdateQueue()

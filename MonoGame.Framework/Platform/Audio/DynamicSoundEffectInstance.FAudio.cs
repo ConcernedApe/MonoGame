@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 
 namespace Microsoft.Xna.Framework.Audio
 {
-    public sealed partial class DynamicSoundEffectInstance : SoundEffectInstance
+    public partial class DynamicSoundEffectInstance : SoundEffectInstance
     {
         internal FAudio.FAudioWaveFormatEx format;
 
@@ -149,21 +149,17 @@ namespace Microsoft.Xna.Framework.Audio
                     FAudio.FAUDIO_VOICE_NOSAMPLESPLAYED
                 );
 
-                int removed_buffers = 0;
-
                 while (PendingBufferCount > state.BuffersQueued)
                 {
                     lock (queuedBuffers)
                     {
                         Marshal.FreeHGlobal(queuedBuffers[0]);
                         queuedBuffers.RemoveAt(0);
-                        removed_buffers++;
                     }
                 }
 
                 // Raise the event for each removed buffer, if needed
-                for (int i = 0; i < removed_buffers; i++)
-                    CheckBufferCount();
+                CheckBufferCount();
             }
         }
     }

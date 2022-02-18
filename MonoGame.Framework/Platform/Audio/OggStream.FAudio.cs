@@ -16,7 +16,7 @@ using NVorbis;
 
 namespace Microsoft.Xna.Framework.Audio
 {
-    internal class OggStream : IDisposable
+    public class OggStream : IDisposable
     {
         readonly string oggFileName;
 
@@ -119,7 +119,16 @@ namespace Microsoft.Xna.Framework.Audio
             }
         }
 
-        public bool IsLooped { get; set; }
+        public bool IsLooped {
+            get
+            {
+                return _instance.IsLooped;
+            }
+            set
+            {
+                _instance.IsLooped = value;
+            }
+        }
 
         public void Dispose()
         {
@@ -149,15 +158,22 @@ namespace Microsoft.Xna.Framework.Audio
             // Handle stream end.
             if (Reader.DecodedPosition >= Reader.TotalSamples)
             {
-                if (_instance.PendingBufferCount == 0)
+                if (IsLooped)
                 {
-                    if (FinishedAction != null)
-                    {
-                        FinishedAction();
-                    }
+                    Reader.DecodedPosition = 0;
                 }
+                else
+                {
+                    if (_instance.PendingBufferCount == 0)
+                    {
+                        if (FinishedAction != null)
+                        {
+                            FinishedAction();
+                        }
+                    }
 
-                return;
+                    return;
+                }
             }
 
             int read_samples = Reader.ReadSamples(readSampleBuffer, 0, bufferSize);
@@ -182,7 +198,7 @@ namespace Microsoft.Xna.Framework.Audio
             _instance.SubmitBuffer(xnaBuffer, 0, read_samples * BytesPerSample);
         }
 
-        static void CastBuffer(float[] inBuffer, short[] outBuffer, int length)
+        public static void CastBuffer(float[] inBuffer, short[] outBuffer, int length)
         {
             for (int i = 0; i < length; i++)
             {
@@ -191,6 +207,11 @@ namespace Microsoft.Xna.Framework.Audio
                 else if (temp < short.MinValue) temp = short.MinValue;
                 outBuffer[i] = (short)temp;
             }
+        }
+
+        public DynamicSoundEffectInstance GetSoundEffectInstance()
+        {
+            return _instance;
         }
 
         internal void Close()

@@ -14,7 +14,7 @@ namespace Microsoft.Xna.Framework.Audio
     {
         private bool _isDisposed = false;
         internal bool _isPooled = true;
-        internal bool _isXAct;
+        public bool _isXAct;
         internal bool _isDynamic;
         internal SoundEffect _effect;
         private float _pan;
@@ -71,6 +71,7 @@ namespace Microsoft.Xna.Framework.Audio
             set
             {
                 // XAct sound effects don't have volume limits.
+
                 if (!_isXAct && (value < 0.0f || value > 1.0f))
                     throw new ArgumentOutOfRangeException();
 
