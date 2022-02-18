@@ -58,7 +58,7 @@ namespace Microsoft.Xna.Framework.Audio
                 {
                     sound.soundBank.GetSoundEffect(sound.waveBankIndex, sound.trackIndex).RemoveDependency();
                 }
-                else if (sound.soundClips != null && sound.soundClips.Length > 0 && sound.soundClips[0].clipEvents.Length > 0 && sound.soundClips[0].clipEvents[0] is PlayWaveEvent)
+                else if (sound.soundClips != null)
                 {
                     foreach (var clip in sound.soundClips)
                     {
@@ -86,8 +86,24 @@ namespace Microsoft.Xna.Framework.Audio
                 sound_effect.AddDependency();
             }
 
-            //probabilities = new float[] { 1.0F };
-        }
+            foreach (var sound in sounds)
+            {
+                if (sound.soundClips != null)
+                {
+                    foreach (var clip in sound.soundClips)
+                    {
+                        foreach (var clip_event in clip.clipEvents)
+                        {
+                            if (clip_event is PlayWaveEvent)
+                            {
+                                var play_event = clip_event as PlayWaveEvent;
+
+                                // TODO: Set pitch, volume variations.
+                            }
+                        }
+                    }
+                }
+            }
     }
 
     /// <summary>Represents a collection of Cues.</summary>
