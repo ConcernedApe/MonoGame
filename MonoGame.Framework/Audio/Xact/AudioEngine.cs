@@ -306,6 +306,16 @@ namespace Microsoft.Xna.Framework.Audio
 
                 SoundEffect.PlatformSetReverbSettings(_reverbSettings);
             }
+
+            foreach (SoundEffect effect in SoundEffect.EffectsToRemove)
+            {
+                if (effect.ShouldBeRemoved())
+                {
+                    effect.Dispose();
+                }
+            }
+
+            SoundEffect.EffectsToRemove.Clear();
         }
 
         public ReverbSettings GetReverbSettings()

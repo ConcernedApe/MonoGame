@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 ﻿
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace Microsoft.Xna.Framework.Audio
@@ -70,7 +71,12 @@ namespace Microsoft.Xna.Framework.Audio
 
         #endregion
 
+        public static HashSet<SoundEffect> EffectsToRemove = new HashSet<SoundEffect>();
+        protected int _dependencies = 0;
+        protected bool _waveBankSound = false;
+
         #region Internal Constructors
+
 
         internal SoundEffect()
         {
@@ -140,6 +146,9 @@ namespace Microsoft.Xna.Framework.Audio
         internal SoundEffect(MiniFormatTag codec, byte[] buffer, int channels, int sampleRate, int blockAlignment, int loopStart, int loopLength)
         {
             Initialize();
+
+            _waveBankSound = true;
+
             if (_systemState != SoundSystemState.Initialized)
                 throw new NoAudioHardwareException("Audio has failed to initialize. Call SoundEffect.Initialize() before sound operation to get more specific errors.");
 
@@ -295,6 +304,40 @@ namespace Microsoft.Xna.Framework.Audio
             inst._effect = this;
 
             return inst;
+        }
+
+        public void AddDependency()
+        {
+            // Don't handle disposing of wave bank sounds.
+            if (_waveBankSound)
+            {
+                return;
+            }
+
+            _dependencies++;
+        }
+
+        public void RemoveDependency()
+        {
+            // Don't handle disposing of wave bank sounds.
+            if (_waveBankSound)
+            {
+                return;
+            }
+
+            _dependencies--;
+            EffectsToRemove.Add(this);
+        }
+
+        public bool ShouldBeRemoved()
+        {
+            // Don't handle disposing of wave bank sounds.
+            if (_waveBankSound)
+            {
+                return false;
+            }
+
+            return _dependencies == 0;
         }
 
         /// <summary>
