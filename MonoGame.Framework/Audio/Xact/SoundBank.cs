@@ -79,7 +79,7 @@ namespace Microsoft.Xna.Framework.Audio
             }
 
             sounds.Clear();
-            sounds.Add(new XactSoundBankSound(sound_effects, category_id, loop, use_reverb) );
+            sounds.Add(new XactSoundBankSound(sound_effects, category_id, loop, use_reverb));
 
             foreach (var sound_effect in sound_effects)
             {
@@ -104,6 +104,7 @@ namespace Microsoft.Xna.Framework.Audio
                     }
                 }
             }
+        }
     }
 
     /// <summary>Represents a collection of Cues.</summary>
