@@ -268,6 +268,20 @@ namespace Microsoft.Xna.Framework.Graphics
 			this.GetData(0, null, data, 0, data.Length);
 		}
 
+        public void CopyFromTexture(Texture2D other)
+        {
+            Color[] pixel_data = new Color[other.width * other.height];
+            other.GetData<Color>(pixel_data);
+
+            width = other.width;
+            height = other.height;
+            /* copy over any other values as needed. */
+            this.TexelWidth = other.TexelWidth;
+            this.TexelHeight = other.TexelHeight;
+
+            SetData<Color>(pixel_data);
+        }
+
         /// <summary>
         /// Creates a <see cref="Texture2D"/> from a file, supported formats bmp, gif, jpg, png, tif and dds (only for simple textures).
         /// May work with other formats, but will not work with tga files.
