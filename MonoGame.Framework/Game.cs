@@ -493,6 +493,16 @@ namespace Microsoft.Xna.Framework
         private Stopwatch _gameTimer;
         private long _previousTicks = 0;
         private int _updateFrameLag;
+
+        // From FNA
+
+        // must be a power of 2 so we can do a bitmask optimization when checking worst case
+        private const int PREVIOUS_SLEEP_TIME_COUNT = 128;
+        private const int SLEEP_TIME_MASK = PREVIOUS_SLEEP_TIME_COUNT - 1;
+        private TimeSpan[] _previousSleepTimes = new TimeSpan[PREVIOUS_SLEEP_TIME_COUNT];
+        private int _sleepTimeIndex = 0;
+        private TimeSpan _worstCaseSleepPrecision = TimeSpan.FromMilliseconds(1);
+
 #if WINDOWS_UAP
         private readonly object _locker = new object();
 #endif
@@ -529,6 +539,10 @@ namespace Microsoft.Xna.Framework
             _accumulatedElapsedTime += TimeSpan.FromTicks(currentTicks - _previousTicks);
             _previousTicks = currentTicks;
 
+            // ARTHUR 2/20/2022: Trying out FNA's logic for idling to reduce Sleep overshooting the update time and
+            // causing visual stutters while also not just cycling in a loop and eating up the CPU.
+            
+            /*
             if (IsFixedTimeStep && _accumulatedElapsedTime < TargetElapsedTime)
             {
                 // Sleep for as long as possible without overshooting the update time
@@ -540,12 +554,44 @@ namespace Microsoft.Xna.Framework
                 lock (_locker)
                     if (sleepTime >= 2.0)
                         System.Threading.Monitor.Wait(_locker, 1);
-#elif DESKTOPGL || ANDROID || IOS
+#elif DESKTOPGL
+                System.Threading.Thread.SpinWait(1);
+#elif ANDROID || IOS
                 if (sleepTime >= 2.0)
                     System.Threading.Thread.Sleep(1);
 #endif
                 // Keep looping until it's time to perform the next update
                 goto RetryTick;
+            }*/
+
+            // This code is from FNA.
+
+            AdvanceElapsedTime();
+
+            if (IsFixedTimeStep)
+            {
+                /* If we are in fixed timestep, we want to wait until the next frame,
+                 * but we don't want to oversleep. Requesting repeated 1ms sleeps and
+                 * seeing how long we actually slept for lets us estimate the worst case
+                 * sleep precision so we don't oversleep the next frame.
+                 */
+                while (_accumulatedElapsedTime + _worstCaseSleepPrecision < TargetElapsedTime)
+                {
+                    System.Threading.Thread.Sleep(1);
+                    TimeSpan timeAdvancedSinceSleeping = AdvanceElapsedTime();
+                    UpdateEstimatedSleepPrecision(timeAdvancedSinceSleeping);
+                }
+
+                /* Now that we have slept into the sleep precision threshold, we need to wait
+                 * for just a little bit longer until the target elapsed time has been reached.
+                 * SpinWait(1) works by pausing the thread for very short intervals, so it is
+                 * an efficient and time-accurate way to wait out the rest of the time.
+                 */
+                while (_accumulatedElapsedTime < TargetElapsedTime)
+                {
+                    System.Threading.Thread.SpinWait(1);
+                    AdvanceElapsedTime();
+                }
             }
 
             // Do not allow any update to take longer than our maximum.
@@ -554,6 +600,13 @@ namespace Microsoft.Xna.Framework
 
             if (IsFixedTimeStep)
             {
+                while (_accumulatedElapsedTime + _worstCaseSleepPrecision < TargetElapsedTime)
+                {
+                    System.Threading.Thread.Sleep(1);
+                    TimeSpan timeAdvancedSinceSleeping = AdvanceElapsedTime();
+                    UpdateEstimatedSleepPrecision(timeAdvancedSinceSleeping);
+                }
+
                 _gameTime.ElapsedGameTime = TargetElapsedTime;
                 var stepCount = 0;
 
@@ -616,6 +669,56 @@ namespace Microsoft.Xna.Framework
         }
 
         #endregion
+
+        // From FNA
+        private TimeSpan AdvanceElapsedTime()
+        {
+            long currentTicks = _gameTimer.Elapsed.Ticks;
+            TimeSpan timeAdvanced = TimeSpan.FromTicks(currentTicks - _previousTicks);
+            _accumulatedElapsedTime += timeAdvanced;
+            _previousTicks = currentTicks;
+            return timeAdvanced;
+        }
+
+        private void UpdateEstimatedSleepPrecision(TimeSpan timeSpentSleeping)
+        {
+            /* It is unlikely that the scheduler will actually be more imprecise than
+			 * 4ms and we don't want to get wrecked by a single long sleep so we cap this
+			 * value at 4ms for sanity.
+			 */
+            TimeSpan upperTimeBound = TimeSpan.FromMilliseconds(4);
+
+            if (timeSpentSleeping > upperTimeBound)
+            {
+                timeSpentSleeping = upperTimeBound;
+            }
+
+            /* We know the previous worst case - it's saved in worstCaseSleepPrecision.
+			 * We also know the current index. So the only way the worst case changes
+			 * is if we either 1) just got a new worst case, or 2) the worst case was
+			 * the oldest entry on the list.
+			 */
+            if (timeSpentSleeping >= _worstCaseSleepPrecision)
+            {
+                _worstCaseSleepPrecision = timeSpentSleeping;
+            }
+            else if (_previousSleepTimes[_sleepTimeIndex] == _worstCaseSleepPrecision)
+            {
+                TimeSpan maxSleepTime = TimeSpan.MinValue;
+                for (int i = 0; i < _previousSleepTimes.Length; i += 1)
+                {
+                    if (_previousSleepTimes[i] > maxSleepTime)
+                    {
+                        maxSleepTime = _previousSleepTimes[i];
+                    }
+                }
+                _worstCaseSleepPrecision = maxSleepTime;
+            }
+
+            _previousSleepTimes[_sleepTimeIndex] = timeSpentSleeping;
+            _sleepTimeIndex = (_sleepTimeIndex + 1) & SLEEP_TIME_MASK;
+        }
+
 
         #region Protected Methods
 
