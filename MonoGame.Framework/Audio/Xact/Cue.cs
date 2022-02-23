@@ -177,8 +177,11 @@ namespace Microsoft.Xna.Framework.Audio
             get { return _name; }
         }
 
+        protected CueDefinition _cueDefinition;
+
         internal Cue(AudioEngine engine, CueDefinition cue)
         {
+            _cueDefinition = cue;
             _engine = engine;
             _name = cue.name;
             _xactSounds = cue.sounds;
@@ -341,6 +344,11 @@ namespace Microsoft.Xna.Framework.Audio
                 }
             }
 
+            if (_cueDefinition != null)
+            {
+                _cueDefinition.OnModified += _OnCueDefinitionModified;
+            }
+
             _played = true;
             IsPrepared = false;
         }
@@ -415,7 +423,44 @@ namespace Microsoft.Xna.Framework.Audio
                 }
             }
 
+            if (_cueDefinition != null)
+            {
+                _cueDefinition.OnModified -= _OnCueDefinitionModified;
+            }
+
             IsPrepared = false;
+        }
+
+        protected void _OnCueDefinitionModified()
+        {
+            if (IsPaused)
+            {
+                _soundEffect.Stop();
+                // Need to call dispose?
+
+                _soundEffect = null;
+                Play();
+
+                if (_soundEffect != null)
+                {
+                    _soundEffect.Pause();
+                }
+            }
+            else if (IsPlaying)
+            {
+                _soundEffect.Stop();
+                // Need to call dispose?
+
+                _soundEffect = null;
+                Play();
+            }
+            else if (_soundEffect != null)
+            {
+                _soundEffect.Stop();
+                // Need to call dispose?
+
+                _soundEffect = null;
+            }
         }
 
         private int FindVariable(string name)
@@ -733,6 +778,12 @@ namespace Microsoft.Xna.Framework.Audio
                 IsCreated = false;
                 IsPrepared = false;
                 EventHelpers.Raise(this, Disposing, EventArgs.Empty);
+
+                if (_cueDefinition != null)
+                {
+                    _cueDefinition.OnModified -= _OnCueDefinitionModified;
+                    _cueDefinition = null;
+                }
             }
         }
     }

@@ -17,6 +17,8 @@ namespace Microsoft.Xna.Framework.Audio
         //public List<float> probabilities;
         public int instanceLimit = 255;
 
+        public System.Action OnModified;
+
         public LimitBehavior limitBehavior = LimitBehavior.FailToPlay;
 
         public enum LimitBehavior
