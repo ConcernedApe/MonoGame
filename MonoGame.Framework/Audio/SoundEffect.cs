@@ -112,7 +112,7 @@ namespace Microsoft.Xna.Framework.Audio
 
                     _duration = vorbis_reader.TotalTime;
 
-                    PlatformInitializePcm(xna_buffer, 0, xna_buffer.Length, 16, vorbis_reader.SampleRate, (AudioChannels)vorbis_reader.Channels, 0, xna_buffer.Length);
+                    PlatformInitializePcm(xna_buffer, 0, xna_buffer.Length, 16, vorbis_reader.SampleRate, (AudioChannels)vorbis_reader.Channels, 0, (int)vorbis_reader.TotalSamples);
                     return;
                 }
             }

@@ -158,8 +158,14 @@ namespace Microsoft.Xna.Framework.Audio
                     }
                 }
 
+
                 // Raise the event for each removed buffer, if needed
                 CheckBufferCount();
+
+                if (state.BuffersQueued == 0)
+                {
+                    Stop(true);
+                }
             }
         }
     }
