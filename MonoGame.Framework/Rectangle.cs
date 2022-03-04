@@ -547,6 +547,34 @@ namespace Microsoft.Xna.Framework
             height = Height;
         }
 
+        /// <summary>
+        /// Multiplies the components of two vectors by each other.
+        /// </summary>
+        /// <param name="value1">Source <see cref="Vector2"/> on the left of the mul sign.</param>
+        /// <param name="value2">Source <see cref="Vector2"/> on the right of the mul sign.</param>
+        /// <returns>Result of the vector multiplication.</returns>
+        public static Rectangle operator *(Rectangle value1, int value2)
+        {
+            value1.X *= value2;
+            value1.Y *= value2;
+            value1.Width *= value2;
+            value1.Height *= value2;
+            return value1;
+        }
+        /// <summary>
+        /// Multiplies the components of two vectors by each other.
+        /// </summary>
+        /// <param name="value1">Source <see cref="Vector2"/> on the left of the mul sign.</param>
+        /// <param name="value2">Source <see cref="Vector2"/> on the right of the mul sign.</param>
+        /// <returns>Result of the vector multiplication.</returns>
+        public static Rectangle operator /(Rectangle value1, int value2)
+        {
+            value1.X /= value2;
+            value1.Y /= value2;
+            value1.Width /= value2;
+            value1.Height /= value2;
+            return value1;
+        }
         #endregion
     }
 }
