@@ -132,8 +132,11 @@ namespace Microsoft.Xna.Framework.Audio
 
         public void Dispose()
         {
-            _instance.Dispose();
-            _instance = null;
+            if (_instance != null)
+			{
+                _instance.Dispose();
+                _instance = null;
+            }
         }
 
         internal void Open(bool precache = false)
