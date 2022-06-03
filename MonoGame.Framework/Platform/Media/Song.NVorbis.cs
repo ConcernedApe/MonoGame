@@ -78,6 +78,12 @@ namespace Microsoft.Xna.Framework.Media
             stream.Resume();
         }
 
+        public bool IsPlaying()
+        {
+            if (stream == null)
+                return false;
+            return AL.GetSourceState(stream.alSourceId) == ALSourceState.Playing;
+        }
         public void Pause()
         {
             if (stream == null)
