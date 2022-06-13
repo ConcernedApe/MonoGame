@@ -105,6 +105,7 @@ namespace Microsoft.Xna.Framework.Audio
             return audioData;
         }
 #endif
+#if FAUDIO
         public unsafe static bool Load(BinaryReader reader, out IntPtr format_ptr, out FAudio.FAudioBuffer buffer)
         {
             format_ptr = IntPtr.Zero;
@@ -166,6 +167,7 @@ namespace Microsoft.Xna.Framework.Audio
                 }
             }
         }
+#endif
 #if !FAUDIO
         private static byte[] LoadWave(BinaryReader reader, out ALFormat format, out int frequency, out int channels, out int blockAlignment, out int bitsPerSample, out int samplesPerBlock, out int sampleCount)
         {
