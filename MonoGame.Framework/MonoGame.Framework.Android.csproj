@@ -31,6 +31,7 @@
     <Compile Remove="Graphics\GraphicsAdapter.cs" />
     <Compile Remove="Graphics\OcclusionQuery.cs" />
     <Compile Remove="Input\Keyboard.cs" />
+    <Compile Remove="Audio\Xact\WaveBank.Default.cs" />
   </ItemGroup>
 
   <ItemGroup>
