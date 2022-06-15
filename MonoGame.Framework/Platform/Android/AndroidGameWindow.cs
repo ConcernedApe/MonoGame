@@ -330,5 +330,20 @@ namespace Microsoft.Xna.Framework
         protected override void SetTitle(string title)
         {
         }
+
+        public override Rectangle GetDisplayBounds(int index)
+        {
+            return _clientBounds;
+        }
+
+        public override bool CenterOnDisplay(int index)
+        {
+            return true;
+        }
+
+        public override int GetDisplayIndex()
+        {
+            return 0;
+        }
     }
 }
