@@ -372,29 +372,30 @@ namespace Microsoft.Xna.Framework.Audio
                 return streams.Remove(stream);
         }
 
-        public bool FillBuffer(OggStream stream, int bufferId)
+        int readSamples;
+
+        public bool FillBuffer(OggStream stream, int bufferId, int offset = 0)
         {
-            int readSamples;
             lock (readMutex)
             {
-                readSamples = stream.Reader.ReadSamples(readSampleBuffer, 0, BufferSize);
-                CastBuffer(readSampleBuffer, castBuffer, readSamples);
+                readSamples = stream.Reader.ReadSamples(readSampleBuffer, offset, BufferSize - offset);
+                CastBuffer(readSampleBuffer, castBuffer, readSamples, offset);
             }
             AL.BufferData(bufferId, stream.Reader.Channels == 1 ? ALFormat.Mono16 : ALFormat.Stereo16, castBuffer,
-                readSamples * sizeof(short), stream.Reader.SampleRate);
+                BufferSize * sizeof(short), stream.Reader.SampleRate);
             ALHelper.CheckError("Failed to fill buffer, readSamples = {0}, SampleRate = {1}, buffer.Length = {2}.", readSamples, stream.Reader.SampleRate, castBuffer.Length);
 
 
             return readSamples != BufferSize;
         }
-        static void CastBuffer(float[] inBuffer, short[] outBuffer, int length)
+        static void CastBuffer(float[] inBuffer, short[] outBuffer, int length, int offset = 0)
         {
-            for (int i = 0; i < length; i++)
+            for (int i = 0; i < length; i++, offset++)
             {
-                var temp = (int)(32767f * inBuffer[i]);
+                var temp = (int)(32767f * inBuffer[offset]);
                 if (temp > short.MaxValue) temp = short.MaxValue;
                 else if (temp < short.MinValue) temp = short.MinValue;
-                outBuffer[i] = (short)temp;
+                outBuffer[offset] = (short)temp;
             }
         }
 
@@ -452,8 +453,7 @@ namespace Microsoft.Xna.Framework.Audio
                                     // 12/10/2021 ARTHUR: I don't know enough about OpenAL to know if this does what I think it does, but it seems to work. The intent here is to
                                     // fill out the remainder of this buffer with the audio from the beginning of the stream.
                                     finished = false;
-
-                                    FillBuffer(stream, tempBuffers[i]);
+                                    FillBuffer(stream, tempBuffers[i], readSamples);
                                 }
                                 else
                                 {
