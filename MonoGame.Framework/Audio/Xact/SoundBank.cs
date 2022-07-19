@@ -362,6 +362,14 @@ namespace Microsoft.Xna.Framework.Audio
             return waveBank.GetSoundEffectInstance(trackIndex, out streaming);
         }
 
+        public bool Exists(string name)
+        {
+            if (string.IsNullOrEmpty(name))
+                throw new ArgumentNullException("name");
+
+            return _cues.ContainsKey(name);
+        }
+
         public CueDefinition GetCueDefinition(string name)
         {
             if (string.IsNullOrEmpty(name))
