@@ -56,6 +56,21 @@ namespace MonoGame.Tests.Framework
         {
             throw new NotImplementedException();
         }
+
+        public override Rectangle GetDisplayBounds(int index)
+        {
+            return Rectangle.Empty;
+        }
+
+        public override bool CenterOnDisplay(int index)
+        {
+            return true;
+        }
+
+        public override int GetDisplayIndex()
+        {
+            return 0;
+        }
     }
 
 #endif // !MONOMAC
