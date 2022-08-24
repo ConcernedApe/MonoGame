@@ -46,7 +46,10 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
                     return input;
             }
 
-            if (ColorKeyEnabled || ResizeToPowerOfTwo || MakeSquare || PremultiplyAlpha || GenerateMipmaps)
+            bool PackPowerOfTwo =   context.TargetPlatform == TargetPlatform.Android ||
+                                    context.TargetPlatform == TargetPlatform.iOS;
+
+            if (ColorKeyEnabled || ResizeToPowerOfTwo || PackPowerOfTwo || MakeSquare || PremultiplyAlpha || GenerateMipmaps)
             {
                 // Convert to floating point format for modifications. Keep the original format for conversion back later on if required.
                 var originalType = input.Faces[0][0].GetType();
@@ -93,6 +96,25 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
                             var newSize = Math.Max(bmp.Width, bmp.Height);
                             var resized = new PixelBitmapContent<Vector4>(newSize, newSize);
                             BitmapContent.Copy(bmp, resized);
+                        }
+                        else if (PackPowerOfTwo && !GraphicsUtil.IsPowerOfTwo(bmp.Width) || !GraphicsUtil.IsPowerOfTwo(bmp.Height))
+                        {
+                            // On mobile if the texture is not power of two in size
+                            // then place it in a power of two image and store the
+                            // original content size.
+
+                            if (m == 0 && f == 0)
+                            {
+                                input.ContentWidth = bmp.Width;
+                                input.ContentHeight = bmp.Height;
+                            }
+
+                            var newWidth = GraphicsUtil.GetNextPowerOfTwo(bmp.Width);
+                            var newHeight = GraphicsUtil.GetNextPowerOfTwo(bmp.Height);
+                            var packed = new PixelBitmapContent<Vector4>(newWidth, newHeight);
+                            var bounds = new Rectangle(0, 0, bmp.Width, bmp.Height);
+                            BitmapContent.Copy(bmp, bounds, packed, bounds);
+                            bmp = packed;
                         }
 
                         if (PremultiplyAlpha)

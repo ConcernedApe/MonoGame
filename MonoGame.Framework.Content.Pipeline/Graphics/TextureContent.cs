@@ -112,5 +112,15 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
         /// </summary>
         /// <param name="targetProfile">The profile identifier that defines the capabilities of the device.</param>
         public abstract void Validate(GraphicsProfile? targetProfile);
+
+        /// <summary>
+        /// The original content width of the image before it was packed.
+        /// </summary>
+        public int ContentWidth { get; set; }
+
+        /// <summary>
+        /// The original content height of the image before it was packed.
+        /// </summary>
+        public int ContentHeight { get; set; }
     }
 }

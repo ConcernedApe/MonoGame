@@ -85,7 +85,7 @@ namespace Microsoft.Xna.Framework.Graphics
         private void PlatformSetData<T>(int level, T[] data, int startIndex, int elementCount) where T : struct
         {
             int w, h;
-            GetSizeForLevel(Width, Height, level, out w, out h);
+            GetSizeForLevel(ActualWidth, ActualHeight, level, out w, out h);
             Threading.BlockOnUIThread(() =>
             {
                 var elementSizeInByte = ReflectionHelpers.SizeOf<T>.Get();
