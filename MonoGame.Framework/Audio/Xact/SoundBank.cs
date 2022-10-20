@@ -375,14 +375,7 @@ namespace Microsoft.Xna.Framework.Audio
             if (string.IsNullOrEmpty(name))
                 throw new ArgumentNullException("name");
 
-            CueDefinition cue_definition;
-
-            if (!_cues.TryGetValue(name, out cue_definition))
-            {
-                throw new ArgumentException();
-            }
-
-            return _cues[name];
+            return this.RequireCueDefinition(name);
         }
 
         /// <summary>
@@ -398,12 +391,7 @@ namespace Microsoft.Xna.Framework.Audio
             if (string.IsNullOrEmpty(name))
                 throw new ArgumentNullException("name");
 
-            CueDefinition cue_definition;
-
-            if (!_cues.TryGetValue(name, out cue_definition))
-            {
-                throw new ArgumentException();
-            }
+            CueDefinition cue_definition = this.RequireCueDefinition(name);
 
             IsInUse = true;
 
@@ -421,12 +409,7 @@ namespace Microsoft.Xna.Framework.Audio
             if (string.IsNullOrEmpty(name))
                 throw new ArgumentNullException("name");
 
-            CueDefinition cue_definition;
-
-            if (!_cues.TryGetValue(name, out cue_definition))
-            {
-                throw new ArgumentException();
-            }
+            CueDefinition cue_definition = this.RequireCueDefinition(name);
 
             IsInUse = true;
             var cue = new Cue(_audioengine, cue_definition);
@@ -448,12 +431,7 @@ namespace Microsoft.Xna.Framework.Audio
             if (string.IsNullOrEmpty(name))
                 throw new ArgumentNullException("name");
 
-            CueDefinition cue_definition;
-
-            if (!_cues.TryGetValue(name, out cue_definition))
-            {
-                throw new ArgumentException();
-            }
+            CueDefinition cue_definition = this.RequireCueDefinition(name);
 
             IsInUse = true;
 
@@ -504,6 +482,16 @@ namespace Microsoft.Xna.Framework.Audio
         public void AddCue(CueDefinition cue_definition)
         {
             _cues[cue_definition.name] = cue_definition;
+        }
+
+        /// <summary>Get a cue definition if it exists, else throw an exception.</summary>
+        /// <param name="name">The cue name to load.</param>
+        /// <exception cref="ArgumentException">There's no cue definition matching <paramref name="name"/>.</exception>
+        private CueDefinition RequireCueDefinition(string name)
+        {
+            return _cues.TryGetValue(name, out CueDefinition cueDefinition)
+                ? cueDefinition
+                : throw new ArgumentException($"There's no audio cue with ID '{name}'.", nameof(name));
         }
     }
 }
