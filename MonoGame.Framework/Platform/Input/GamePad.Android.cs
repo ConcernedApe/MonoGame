@@ -2,6 +2,7 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
+using Android.OS;
 using Android.Views;
 
 namespace Microsoft.Xna.Framework.Input
@@ -178,10 +179,21 @@ namespace Microsoft.Xna.Framework.Input
             if (gamePad == null)
                 return false;
 
-            var vibrator = gamePad._device.Vibrator;
-            if (!vibrator.HasVibrator)
-                return false;
-            vibrator.Vibrate(500);
+            var strength = MathHelper.Max(leftMotor, rightMotor);
+            strength = MathHelper.Max(leftTrigger, strength);
+            strength = MathHelper.Max(rightTrigger, strength);
+            strength = MathHelper.Clamp(strength * 255, 0, 255);
+
+            if (strength > 0.9999f)
+            {
+                var effect = VibrationEffect.CreateOneShot(250, (int)strength);
+                var combined = CombinedVibration.CreateParallel(effect);
+                var device = gamePad._device;
+                var manager = device.VibratorManager;
+
+                manager.Vibrate(combined);
+            }
+
             return true;
         }
 
