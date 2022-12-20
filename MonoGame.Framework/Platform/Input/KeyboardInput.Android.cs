@@ -23,8 +23,10 @@ namespace Microsoft.Xna.Framework.Input
 
                 var input = new EditText(Game.Activity) { Text = defaultText };
 
-                if (defaultText != null)
+                if (!string.IsNullOrEmpty(defaultText))
                     input.SetSelection(defaultText.Length);
+
+                input.SetSelectAllOnFocus(true);
 
                 if (usePasswordMode)
                     input.InputType = Android.Text.InputTypes.ClassText | Android.Text.InputTypes.TextVariationPassword;
@@ -40,13 +42,13 @@ namespace Microsoft.Xna.Framework.Input
                 alert.SetButton((int)DialogButtonType.Negative, "Cancel", (sender, args) =>
                 {
                     if (!tcs.Task.IsCompleted)
-                        tcs.SetResult(null);
+                        tcs.SetResult(defaultText);
                 });
 
                 alert.CancelEvent += (sender, args) =>
                 {
                     if (!tcs.Task.IsCompleted)
-                        tcs.SetResult(null);
+                        tcs.SetResult(defaultText);
                 };
 
                 alert.Show();
