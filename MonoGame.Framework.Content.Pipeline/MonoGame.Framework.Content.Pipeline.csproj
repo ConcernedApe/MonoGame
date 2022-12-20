@@ -3,7 +3,7 @@
   <Import Project="..\MonoGame.props" />
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <BaseOutputPath>..\Artifacts\MonoGame.Framework.Content.Pipeline</BaseOutputPath>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Description>The Monogame Content Pipeline for Windows, Mac and Linux is used to compile raw content to xnb files.</Description>
