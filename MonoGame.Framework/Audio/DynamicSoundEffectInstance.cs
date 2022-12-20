@@ -22,14 +22,16 @@ namespace Microsoft.Xna.Framework.Audio
         {
             get
             {
-                return false;
+                return _looped;
             }
 
             set
             {
                 AssertNotDisposed();
-                if (value == true)
-                    throw new InvalidOperationException("IsLooped cannot be set true. Submit looped audio data to implement looping.");
+                _looped = value;
+
+                //if (value == true)
+                //throw new InvalidOperationException("IsLooped cannot be set true. Submit looped audio data to implement looping.");
             }
         }
 
@@ -71,6 +73,7 @@ namespace Microsoft.Xna.Framework.Audio
         private SoundState _state;
         private int _sampleAlignment;
         private bool _msadpcm;
+        private bool _looped;
 
         #region Public Constructor
 

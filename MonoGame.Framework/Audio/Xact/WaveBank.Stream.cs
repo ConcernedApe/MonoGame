@@ -74,45 +74,48 @@ namespace Microsoft.Xna.Framework.Audio
             {
                 byte[] buff = null;
 
-                // We need to retry here until we submit a 
-                // buffer or the stream is finished.
-                while (true)
+                try
                 {
-                    // Submit all the buffers we got to keep the sound fed.         
-                    int submitted = 0;
-                    while (queue.Count > 0)
+                    // We need to retry here until we submit a 
+                    // buffer or the stream is finished.
+                    while (true)
                     {
-                        if (queue.TryDequeue(out buff))
+                        // Submit all the buffers we got to keep the sound fed.         
+                        int submitted = 0;
+                        while (queue.Count > 0)
                         {
-                            sound.SubmitBuffer(buff);
-                            submitted++;
+                            if (queue.TryDequeue(out buff))
+                            {
+                                sound.SubmitBuffer(buff);
+                                submitted++;
+                            }
+                        }
+
+                        // Tell the task to go read more buffers while
+                        // the buffers we just submitted are played.
+                        signal.Set();
+
+                        // If we submitted buffers then we're done.
+                        if (submitted > 0)
+                            return;
+
+                        // If there were no buffers then look and see if we've 
+                        // reached the end of the stream and should stop.
+                        if (stop.WaitOne(0))
+                        {
+                            sound.Stop();
+                            return;
                         }
                     }
-
-                    // Tell the task to go read more buffers while
-                    // the buffers we just submitted are played.
-                    signal.Set();
-
-                    // If we submitted buffers then we're done.
-                    if (submitted > 0)
-                        return;
-
-                    // If there were no buffers then look and see if we've 
-                    // reached the end of the stream and should stop.
-                    if (stop.WaitOne(0))
-                    {
-                        sound.Stop();
-                        return;
-                    }
+                }
+                catch (Exception ex)
+                {
                 }
             };
-                                                                                                
-            var task = Task.Factory.StartNew(() =>
+
+            var thread = new Thread(() =>
             {
-                var stream = AudioEngine.OpenStream(_waveBankFileName);
                 var start = _playRegionOffset + info.FileOffset;
-                var length = info.FileLength;
-                stream.Seek(start, SeekOrigin.Begin);
 
                 var bindex = 0;
                 var buffers = new byte[][]
@@ -123,12 +126,32 @@ namespace Microsoft.Xna.Framework.Audio
                     new byte[bufferSize],
                 };
 
+            RESTART:
+
+                var stream = TitleContainer.OpenStream(_waveBankFileName);
+                var length = info.FileLength;
+
+                if (stream.CanSeek)
+                    stream.Seek(start, SeekOrigin.Begin);
+                else
+                {
+                    // Android doesn't support seekable streams
+                    // so we need to read to seek.
+                    var temp = new byte[1024 * 32];
+                    var curr = 0;
+                    while (curr != start)
+                    {
+                        var read = Math.Min(temp.Length, start - curr);
+                        curr += stream.Read(temp, 0, read);
+                    }
+                }
+
                 while (!sound.IsDisposed)
                 {
                     while (queue.Count < 3 && length > 0)
                     {
-                        var buffer = buffers[bindex % 4];
-                        ++bindex;
+                        var buffer = buffers[bindex];
+                        bindex = (bindex + 1) % 4;
 
                         var read = Math.Min(bufferSize, length);
                         read = stream.Read(buffer, 0, read);
@@ -138,20 +161,25 @@ namespace Microsoft.Xna.Framework.Audio
                         // If we've run out of file then the sound should 
                         // stop and this task can complete.
                         if (length <= 0)
-                        {
-                            stop.Set();
-                            stream.Close();
-                            return;
-                        }
+                            goto DONE;
                     }
 
                     // Wait for a signal that we need more buffers.
                     signal.WaitOne(1000);
                 }
 
-                stream.Close();
-            });
+            DONE:
 
+                stream.Close();
+
+                if (!sound.IsDisposed && sound.IsLooped)
+                    goto RESTART;
+
+                stop.Set();
+                return;
+            });
+            thread.Priority = ThreadPriority.Highest;
+            thread.Start();
 
             return sound;
         }
