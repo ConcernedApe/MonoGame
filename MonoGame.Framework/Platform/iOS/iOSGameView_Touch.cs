@@ -124,7 +124,7 @@ namespace Microsoft.Xna.Framework {
 				//Get position touch
 				var location = touch.LocationInView (touch.View);
 				var position = GetOffsetPosition (new Vector2 ((float)location.X, (float)location.Y), true);
-				var id = touch.Handle.ToInt32 ();
+				var id = touch.Handle.GetHashCode();
 
 				switch (touch.Phase) 
                 {
