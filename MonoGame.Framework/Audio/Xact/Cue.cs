@@ -54,15 +54,15 @@ namespace Microsoft.Xna.Framework.Audio
         {
             get
             {
-                if (_currentXactSound == null)
-                {
-                    return false;
-                }
-
                 if (!_pitchControlledByRPC.HasValue)
                 {
-                    var curves = _currentXactSound.rpcCurves;
+                    XactSoundBankSound sound = _currentXactSound;
+                    if (sound is null && _xactSounds.Count > 0)
+                        sound = _xactSounds[0]; // if there's no sound playing, take the first one on the assumption that either (a) there's only one, or (b) they're all configured similarly
+                    if (sound is null)
+                        return false;
 
+                    var curves = sound.rpcCurves;
                     if (curves.Length > 0)
                     {
                         for (var i = 0; i < curves.Length; i++)
@@ -76,9 +76,7 @@ namespace Microsoft.Xna.Framework.Audio
                     }
 
                     if (!_pitchControlledByRPC.HasValue)
-                    {
                         _pitchControlledByRPC = false;
-                    }
                 }
 
                 return _pitchControlledByRPC.Value;
