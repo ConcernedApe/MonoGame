@@ -242,8 +242,14 @@ namespace Microsoft.Xna.Framework.Audio
                     var salvaged = new int[processed];
                     if (processed > 0)
                     {
-                        AL.SourceUnqueueBuffers(alSourceId, processed, out salvaged);
-                        ALHelper.CheckError("Failed to unqueue buffers (second attempt).");
+                        try
+                        {
+                            AL.SourceUnqueueBuffers(alSourceId, processed, out salvaged);
+                            ALHelper.CheckError("Failed to unqueue buffers (second attempt).");
+                        } catch (Exception e)
+                        {
+
+                        }
                     }
 
                     // Try turning it off again?
