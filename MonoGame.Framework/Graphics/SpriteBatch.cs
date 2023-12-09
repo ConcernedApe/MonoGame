@@ -172,6 +172,8 @@ namespace Microsoft.Xna.Framework.Graphics
                 throw new ArgumentNullException("texture");
             if (!_beginCalled)
                 throw new InvalidOperationException("Draw was called, but Begin has not yet been called. Begin must be called successfully before you can call Draw.");
+            if (texture.IsDisposed)
+                throw new ObjectDisposedException($"Can't draw texture{(texture.Name != null ? $" '{texture.Name}'" : "")} because it's disposed.");
         }
 
         void CheckValid(SpriteFont spriteFont, string text)
