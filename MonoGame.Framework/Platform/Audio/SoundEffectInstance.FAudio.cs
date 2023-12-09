@@ -24,7 +24,7 @@ namespace Microsoft.Xna.Framework.Audio
         internal float _filterQ;
         internal float _filterFrequency;
 
-        private bool _isLooped;
+        private uint _loopCount;
 
         internal SoundState _state = SoundState.Stopped;
 
@@ -96,9 +96,9 @@ namespace Microsoft.Xna.Framework.Audio
 			}
 			else
 			{
-                if (IsLooped)
+                if (_loopCount > 0)
                 {
-                    _effect.handle.LoopCount = 255;
+                    _effect.handle.LoopCount = _loopCount;
                     _effect.handle.LoopBegin = _effect.loopStart;
                     _effect.handle.LoopLength = _effect.loopLength;
                 }
@@ -180,14 +180,14 @@ namespace Microsoft.Xna.Framework.Audio
 			}
 		}
 
-		private void PlatformSetIsLooped(bool value)
+		private void PlatformSetLoopCount(uint value)
 		{
-            _isLooped = value;
+            _loopCount = value;
         }
 
-		private bool PlatformGetIsLooped()
+		private uint PlatformGetLoopCount()
 		{
-			return _isLooped;
+			return _loopCount;
 		}
 
 		private void PlatformSetPan(float value)

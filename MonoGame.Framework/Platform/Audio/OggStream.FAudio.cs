@@ -119,14 +119,14 @@ namespace Microsoft.Xna.Framework.Audio
             }
         }
 
-        public bool IsLooped {
+        public uint LoopCount {
             get
             {
-                return _instance.IsLooped;
+                return _instance.LoopCount;
             }
             set
             {
-                _instance.IsLooped = value;
+                _instance.LoopCount = value;
             }
         }
 
@@ -161,7 +161,7 @@ namespace Microsoft.Xna.Framework.Audio
             // Handle stream end.
             if (Reader.DecodedPosition >= Reader.TotalSamples)
             {
-                if (IsLooped)
+                if (LoopCount > 0)
                 {
                     Reader.DecodedPosition = 0;
                 }

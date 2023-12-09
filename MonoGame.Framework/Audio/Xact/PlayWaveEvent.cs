@@ -23,7 +23,7 @@ namespace Microsoft.Xna.Framework.Audio
 
         public VariationType variationType;
 
-        private int _loopCount;
+        private uint _loopCount;
 
         private bool _newWaveOnLoop;
 
@@ -83,7 +83,7 @@ namespace Microsoft.Xna.Framework.Audio
         public PlayWaveEvent(   XactClip clip, float timeStamp, float randomOffset, SoundBank soundBank,
                                 int[] waveBanks, int[] tracks, byte[] weights, int totalWeights,
                                 VariationType variation, Vector2? volumeVar, Vector2? pitchVar, Vector4? filterVar,
-                                int loopCount, bool newWaveOnLoop)
+                                uint loopCount, bool newWaveOnLoop)
             : base(clip, timeStamp, randomOffset)
         {
             _soundBank = soundBank;
@@ -235,10 +235,7 @@ namespace Microsoft.Xna.Framework.Audio
                 }
             }
  
-            // This is a shortcut for infinite looping of a single track.
-            // NOTE 7/29/2021: Non-infinite loops are not supported currently.
-            new_wave.IsLooped = _loopCount == 255 && trackCount == 1;
-
+            new_wave.LoopCount = _loopCount;
             new_wave.Volume = _trackVolume;
             new_wave.Pitch = _trackPitch;
 

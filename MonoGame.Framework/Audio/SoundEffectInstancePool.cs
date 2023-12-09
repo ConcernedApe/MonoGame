@@ -91,7 +91,7 @@ namespace Microsoft.Xna.Framework.Audio
                 inst.Volume = 1.0f;
                 inst.Pan = 0.0f;
                 inst.Pitch = 0.0f;
-                inst.IsLooped = false;
+                inst.LoopCount = 0;
                 inst.PlatformSetReverbMix(0);
                 inst.PlatformClearFilter();
             }
