@@ -618,7 +618,9 @@ namespace Microsoft.Xna.Framework.Graphics
 		public unsafe void DrawString (SpriteFont spriteFont, string text, Vector2 position, Color color)
 		{
             CheckValid(spriteFont, text);
-            
+
+            position = new Vector2((int)position.X, (int)position.Y);
+
             float sortKey = (_sortMode == SpriteSortMode.Texture) ? spriteFont.Texture.SortingKey : 0;
 
             var offset = Vector2.Zero;
@@ -726,7 +728,9 @@ namespace Microsoft.Xna.Framework.Graphics
             float rotation, Vector2 origin, Vector2 scale, SpriteEffects effects, float layerDepth)
 		{
             CheckValid(spriteFont, text);
-            
+
+            position = new Vector2((int)position.X, (int)position.Y);
+
             float sortKey = 0;
             // set SortKey based on SpriteSortMode.
             switch (_sortMode)
@@ -907,7 +911,9 @@ namespace Microsoft.Xna.Framework.Graphics
 		public unsafe void DrawString (SpriteFont spriteFont, StringBuilder text, Vector2 position, Color color)
 		{
             CheckValid(spriteFont, text);
-            
+
+            position = new Vector2((int)position.X, (int)position.Y);
+
             float sortKey =  (_sortMode == SpriteSortMode.Texture) ? spriteFont.Texture.SortingKey : 0;
 
             var offset = Vector2.Zero;
@@ -1015,7 +1021,9 @@ namespace Microsoft.Xna.Framework.Graphics
             float rotation, Vector2 origin, Vector2 scale, SpriteEffects effects, float layerDepth)
 		{
             CheckValid(spriteFont, text);
-            
+
+            position = new Vector2((int)position.X, (int)position.Y);
+
             float sortKey = 0;
             // set SortKey based on SpriteSortMode.
             switch (_sortMode)
