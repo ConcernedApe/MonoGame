@@ -11,7 +11,10 @@
     <FileVersion>0.0.0.0</FileVersion>
     <Version>3.8.0.1641</Version>
     <OutputType>Library</OutputType>
-	<LangVersion>latest</LangVersion>
+    <LangVersion>latest</LangVersion>
+
+    <!-- Use embedded symbols (needed for error stack trace line numbers on Linux/macOS: https://github.com/dotnet/runtime/issues/39987) -->
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
 
   <!-- NETFX reference assemblies let us target .NET Framework on Mac/Linux without Mono -->
