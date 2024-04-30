@@ -1,6 +1,6 @@
 [submodule "ThirdParty/Dependencies"]
 	path = ThirdParty/Dependencies
-url=https://github.com/MrPodunkian/MonoGame.Dependencies.git
+url=https://github.com/ConcernedApe/MonoGame.Dependencies.git
 [submodule "ThirdParty/NVorbis"]
 	path = ThirdParty/NVorbis
 url=https://github.com/NVorbis/NVorbis.git
