@@ -268,7 +268,15 @@ namespace Microsoft.Xna.Framework
             // becomes wrong (for me it always returned 10 8). Solution is
             // to not try and set the window position because it will be wrong.
             if ((Sdl.version > new Sdl.Version() { Major = 2, Minor = 0, Patch = 4 }  || !AllowUserResizing))
-                Sdl.Window.SetPosition(Handle, centerX, centerY);
+            {
+                int winFlags = Sdl.Window.GetWindowFlags(Handle);
+
+                // On Windows, we should let the OS decide where to position the window when it is
+                // maximized. Otherwise, we often end up with a slight padding on the left, which can
+                // cause the game to "overflow" onto another monitor.
+                if (CurrentPlatform.OS == OS.Windows && (winFlags & Sdl.Window.State.Maximized) == 0)
+                    Sdl.Window.SetPosition(Handle, centerX, centerY);
+            }
 
             if (IsFullScreen != _willBeFullScreen)
             {
