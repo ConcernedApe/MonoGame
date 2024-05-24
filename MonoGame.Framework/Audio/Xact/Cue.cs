@@ -744,7 +744,6 @@ namespace Microsoft.Xna.Framework.Audio
                         _rpcFilterFrequency.HasValue ? _rpcFilterFrequency.Value : _soundEffect._filterFrequency);
                 }
             }
-
         }
         
         /// <summary>
