@@ -21,6 +21,40 @@ namespace Microsoft.Xna.Framework.Audio
         float frequency;
         int pauseCount;
 
+        private bool _filterEnabled = false;
+
+        internal FilterMode _filterMode
+        {
+            get
+            {
+                switch (filterType)
+                {
+                    case EfxFilterType.Highpass:
+                        return FilterMode.HighPass;
+                    case EfxFilterType.Bandpass:
+                        return FilterMode.BandPass;
+                    default:
+                        return FilterMode.LowPass;
+                }
+            }
+        }
+
+        internal float _filterQ
+        {
+            get
+            {
+                return filterQ;
+            }
+        }
+
+        internal float _filterFrequency
+        {
+            get
+            {
+                return frequency;
+            }
+        }
+
         internal readonly object sourceMutex = new object();
         
         internal OpenALSoundController controller;
@@ -185,6 +219,7 @@ namespace Microsoft.Xna.Framework.Audio
         {
             FreeSource();
             SoundState = SoundState.Stopped;
+            _filterEnabled = false;
         }
 
         private void FreeSource()
@@ -353,6 +388,7 @@ namespace Microsoft.Xna.Framework.Audio
             if (!OpenALSoundController.Efx.IsInitialized)
                 return;
 
+            _filterEnabled = true;
             applyFilter = true;
             switch (mode)
             {
@@ -375,12 +411,18 @@ namespace Microsoft.Xna.Framework.Audio
             }
         }
 
+        internal bool IsFilterEnabled()
+        {
+            return _filterEnabled;
+        }
+
         internal void PlatformClearFilter()
         {
             if (!OpenALSoundController.Efx.IsInitialized)
                 return;
 
             applyFilter = false;
+            _filterEnabled = false;
         }
 
         private void PlatformDispose(bool disposing)
