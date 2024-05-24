@@ -18,7 +18,69 @@ namespace Microsoft.Xna.Framework.Audio
         internal const int FormatIeee = 3;
         internal const int FormatIma4 = 17;
 
-#if !FAUDIO
+#if FAUDIO
+        public unsafe static bool Load(BinaryReader reader, out IntPtr format_ptr, out FAudio.FAudioBuffer buffer)
+        {
+            format_ptr = IntPtr.Zero;
+            buffer = new FAudio.FAudioBuffer();
+
+            string chunk_type;
+            int chunk_data_size;
+            long riff_data_size = 0;
+            string file_type;
+            uint offset = 0;
+
+            while (true)
+            {
+                chunk_type = new string(reader.ReadChars(4));
+
+                chunk_data_size = (int)reader.ReadUInt32();
+
+                switch (chunk_type)
+                {
+                    case "RIFF":
+                        {
+                            riff_data_size = chunk_data_size;
+                            chunk_data_size = 4;
+                        }
+
+                        file_type = new string(reader.ReadChars(4));
+                        break;
+                    case "fmt ":
+                        {
+                            var data = reader.ReadBytes(chunk_data_size);
+
+                            format_ptr = Marshal.AllocHGlobal(chunk_data_size);
+                            Marshal.Copy(data, 0, format_ptr, chunk_data_size);
+                        }
+                        break;
+                    case "data":
+                        {
+                            buffer.AudioBytes = (uint)chunk_data_size;
+                            buffer.Flags = FAudio.FAUDIO_END_OF_STREAM;
+                            var data = reader.ReadBytes(chunk_data_size);
+
+                            IntPtr ptr = Marshal.AllocHGlobal(chunk_data_size);
+                            Marshal.Copy(data, 0, ptr, chunk_data_size);
+                            buffer.pAudioData = ptr;
+                        }
+                        break;
+                    default:
+                        reader.BaseStream.Seek(chunk_data_size, SeekOrigin.Current);
+                        break;
+                }
+
+                offset += sizeof(uint) * 2;
+
+                offset += (uint)chunk_data_size;
+
+                if (reader.BaseStream.Position >= riff_data_size)
+                {
+                    return false;
+                }
+            }
+        }
+#else
         public static ALFormat GetSoundFormat(int format, int channels, int bits)
         {
             switch (format)
@@ -104,69 +166,7 @@ namespace Microsoft.Xna.Framework.Audio
 
             return audioData;
         }
-#endif
-        public unsafe static bool Load(BinaryReader reader, out IntPtr format_ptr, out FAudio.FAudioBuffer buffer)
-        {
-            format_ptr = IntPtr.Zero;
-            buffer = new FAudio.FAudioBuffer();
 
-            string chunk_type;
-            int chunk_data_size;
-            long riff_data_size = 0;
-            string file_type;
-            uint offset = 0;
-
-            while (true)
-            {
-                chunk_type = new string(reader.ReadChars(4));
-
-                chunk_data_size = (int)reader.ReadUInt32();
-
-                switch (chunk_type)
-                {
-                    case "RIFF":
-                        {
-                            riff_data_size = chunk_data_size;
-                            chunk_data_size = 4;
-                        }
-
-                        file_type = new string(reader.ReadChars(4));
-                        break;
-                    case "fmt ":
-                        {
-                            var data = reader.ReadBytes(chunk_data_size);
-
-                            format_ptr = Marshal.AllocHGlobal(chunk_data_size);
-                            Marshal.Copy(data, 0, format_ptr, chunk_data_size);
-                        }
-                        break;
-                    case "data":
-                        {
-                            buffer.AudioBytes = (uint)chunk_data_size;
-                            buffer.Flags = FAudio.FAUDIO_END_OF_STREAM;
-                            var data = reader.ReadBytes(chunk_data_size);
-
-                            IntPtr ptr = Marshal.AllocHGlobal(chunk_data_size);
-                            Marshal.Copy(data, 0, ptr, chunk_data_size);
-                            buffer.pAudioData = ptr;
-                        }
-                        break;
-                    default:
-                        reader.BaseStream.Seek(chunk_data_size, SeekOrigin.Current);
-                        break;
-                }
-
-                offset += sizeof(uint) * 2;
-
-                offset += (uint)chunk_data_size;
-
-                if (reader.BaseStream.Position >= riff_data_size)
-                {
-                    return false;
-                }
-            }
-        }
-#if !FAUDIO
         private static byte[] LoadWave(BinaryReader reader, out ALFormat format, out int frequency, out int channels, out int blockAlignment, out int bitsPerSample, out int samplesPerBlock, out int sampleCount)
         {
             byte[] audioData = null;

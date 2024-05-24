@@ -234,4 +234,11 @@ namespace Microsoft.Xna.Framework.Audio
             Ready = false;
         }
     }
+
+    public class OggStreamer : IDisposable
+    {
+        public void Dispose()
+        {
+        }
+    }
 }

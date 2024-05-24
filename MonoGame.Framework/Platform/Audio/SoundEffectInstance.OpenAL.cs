@@ -10,7 +10,7 @@ namespace Microsoft.Xna.Framework.Audio
     public partial class SoundEffectInstance : IDisposable
     {
 		internal SoundState SoundState = SoundState.Stopped;
-		private bool _looped = false;
+        private uint _loopCount;
 		private float _alVolume = 1f;
 
 		internal int SourceId;
@@ -109,10 +109,6 @@ namespace Microsoft.Xna.Framework.Audio
             SourceId = controller.ReserveSource();
             HasSourceId = true;
 
-            int bufferId = _effect.SoundBuffer.OpenALDataBuffer;
-            AL.Source(SourceId, ALSourcei.Buffer, bufferId);
-            ALHelper.CheckError("Failed to bind buffer to source.");
-
             // Send the position, gain, looping, pitch, and distance model to the OpenAL driver.
             if (!HasSourceId)
 				return;
@@ -131,9 +127,27 @@ namespace Microsoft.Xna.Framework.Audio
 			// Volume
             AL.Source(SourceId, ALSourcef.Gain, _alVolume);
             ALHelper.CheckError("Failed to set source volume.");
-			// Looping
-			AL.Source (SourceId, ALSourceb.Looping, IsLooped);
+            // Looping
+            AL.Source(SourceId, ALSourcei.Buffer, 0);
+
+            AL.Source(SourceId, ALSourceb.Looping, _loopCount >= 255u);
             ALHelper.CheckError("Failed to set source loop state.");
+
+            int bufferId = _effect.SoundBuffer.OpenALDataBuffer;
+            if (_loopCount == 0u || _loopCount >= 255u)
+            {
+                AL.Source(SourceId, ALSourcei.Buffer, bufferId);
+                ALHelper.CheckError("Failed to bind buffer to source.");
+            }
+            else
+            {
+                for (uint i = 0; i <= _loopCount; ++i)
+                {
+                    AL.SourceQueueBuffer(SourceId, bufferId);
+                    ALHelper.CheckError("Failed to queue buffer to source.");
+                }
+            }
+
 			// Pitch
 			AL.Source (SourceId, ALSourcef.Pitch, XnaPitchToAlPitch(_pitch));
             ALHelper.CheckError("Failed to set source pitch.");
@@ -208,18 +222,22 @@ namespace Microsoft.Xna.Framework.Audio
 
         private void PlatformSetIsLooped(bool value)
         {
-            _looped = value;
-
-            if (HasSourceId)
-            {
-                AL.Source(SourceId, ALSourceb.Looping, _looped);
-                ALHelper.CheckError("Failed to set source loop state.");
-            }
+            PlatformSetLoopCount(value ? 255u : 0u);
         }
 
         private bool PlatformGetIsLooped()
         {
-            return _looped;
+            return LoopCount != 0u;
+        }
+
+        private void PlatformSetLoopCount(uint value)
+        {
+            _loopCount = value;
+        }
+
+        private uint PlatformGetLoopCount()
+        {
+            return _loopCount;
         }
 
         private void PlatformSetPan(float value)

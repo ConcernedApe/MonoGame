@@ -1,0 +1,15 @@
+<Project>
+  <PropertyGroup>
+    <DefineConstants>$(DefineConstants);FAUDIO</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Platform\Audio\AudioLoader.cs" />
+    <Compile Include="Platform\Audio\DynamicSoundEffectInstance.FAudio.cs" />
+    <Compile Include="Platform\Audio\FAudio.cs" />
+    <Compile Include="Platform\Audio\FAudioSoundController.cs" />
+    <Compile Include="Platform\Audio\Microphone.FAudio.cs" />
+    <Compile Include="Platform\Audio\SoundEffect.FAudio.cs" />
+    <Compile Include="Platform\Audio\SoundEffectInstance.FAudio.cs" />
+  </ItemGroup>
+</Project>
