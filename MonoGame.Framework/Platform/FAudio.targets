@@ -4,7 +4,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Platform\Audio\AudioLoader.cs" />
     <Compile Include="Platform\Audio\DynamicSoundEffectInstance.FAudio.cs" />
     <Compile Include="Platform\Audio\FAudio.cs" />
     <Compile Include="Platform\Audio\FAudioSoundController.cs" />
