@@ -273,7 +273,7 @@ namespace Microsoft.Xna.Framework.Audio
                 _buffersNeeded = TargetPendingBufferCount - PendingBufferCount;
         }
 
-        internal void UpdateQueue()
+        internal override void UpdateQueue()
         {
             // Update the buffers
             PlatformUpdateQueue();

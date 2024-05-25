@@ -19,13 +19,13 @@ namespace Microsoft.Xna.Framework.Audio
             _playingInstances = new List<WeakReference>();
         }
 
-        public static void AddInstance(DynamicSoundEffectInstance instance)
+        public static void AddInstance(SoundEffectInstance instance)
         {
             var weakRef = new WeakReference(instance);
             _playingInstances.Add(weakRef);
         }
 
-        public static void RemoveInstance(DynamicSoundEffectInstance instance)
+        public static void RemoveInstance(SoundEffectInstance instance)
         {
             for (int i = _playingInstances.Count - 1; i >= 0; i--)
             {
@@ -47,7 +47,7 @@ namespace Microsoft.Xna.Framework.Audio
         {
             for (int i = _playingInstances.Count - 1; i >= 0; i--)
             {
-                var target = _playingInstances[i].Target as DynamicSoundEffectInstance;
+                var target = _playingInstances[i].Target as SoundEffectInstance;
                 if (target != null)
                 {
                     if (!target.IsDisposed)

@@ -215,5 +215,12 @@ namespace Microsoft.Xna.Framework.Audio
                 _isDisposed = true;
             }
         }
+
+        internal virtual void UpdateQueue()
+        {
+#if OPENAL && !FAUDIO
+            PlatformUpdateQueue();
+#endif
+        }
     }
 }
