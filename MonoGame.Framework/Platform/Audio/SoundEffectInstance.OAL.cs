@@ -5,6 +5,7 @@
 using System;
 using System.Runtime.InteropServices;
 using MonoGame.OpenAL;
+using RTAudioProcessing;
 
 namespace Microsoft.Xna.Framework.Audio
 {
@@ -34,6 +35,8 @@ namespace Microsoft.Xna.Framework.Audio
         private int BufferHead = 0;
         private bool BufferFinished = false;
         private int TimesPlayed = 0;
+
+        private RtapRiver River = new RtapRiver();
 
         private readonly float[] FilterState = new float[2 * 2];
 
@@ -200,6 +203,7 @@ namespace Microsoft.Xna.Framework.Audio
             // Looping
             AL.Source(SourceId, ALSourcei.Buffer, 0);
 
+            River.SetPond(_effect.Pond);
             QueueBuffers();
 
 			// Pitch
@@ -458,24 +462,27 @@ namespace Microsoft.Xna.Framework.Audio
                 BufferIds = null;
                 HasBufferIds = false;
             }
+            River.Dispose();
         }
 
         private unsafe bool QueueBuffer(int bufferId)
         {
-            if (BufferHead > _effect.PcmLength)
+            int pondLength = _effect.Pond.Length;
+
+            if (BufferHead > pondLength)
                 BufferHead = 0;
 
-            int copySize = _effect.PcmLength - BufferHead;
+            int copySize = pondLength - BufferHead;
             if (copySize > DefaultBufferSize)
                 copySize = DefaultBufferSize;
 
             fixed (byte* bufferPtr = BufferData)
             {
-                Marshal.Copy(_effect.PcmBuffer, BufferHead, (IntPtr)bufferPtr, copySize);
+                River.ReadInto((IntPtr)bufferPtr, BufferHead, copySize);
 
                 int copyHead = copySize;
                 BufferHead += copySize;
-                if (BufferHead >= _effect.PcmLength)
+                if (BufferHead >= pondLength)
                 {
                     BufferHead = 0;
                     TimesPlayed++;
@@ -486,17 +493,17 @@ namespace Microsoft.Xna.Framework.Audio
                 {
                     while (unfilled > 0)
                     {
-                        copySize = _effect.PcmLength - BufferHead;
+                        copySize = pondLength - BufferHead;
                         if (copySize > unfilled)
                             copySize = unfilled;
 
-                        Marshal.Copy(_effect.PcmBuffer, BufferHead, (IntPtr)(bufferPtr + copyHead), copySize);
+                        River.ReadInto((IntPtr)(bufferPtr + copyHead), BufferHead, copySize);
 
                         BufferHead += copySize;
                         copyHead += copySize;
                         unfilled -= copySize;
 
-                        if (BufferHead >= _effect.PcmLength)
+                        if (BufferHead >= pondLength)
                         {
                             BufferHead = 0;
                             TimesPlayed++;
@@ -524,7 +531,7 @@ namespace Microsoft.Xna.Framework.Audio
 
             fixed (byte* bufferPtr = BufferData)
             {
-                AL.alBufferData((uint)bufferId, (int)_effect.PcmFormat, (IntPtr)bufferPtr, DefaultBufferSize, _effect.PcmSampleRate);
+                AL.alBufferData((uint)bufferId, (int)_effect.PondFormat, (IntPtr)bufferPtr, DefaultBufferSize, _effect.Pond.SampleRate);
             }
 
             AL.SourceQueueBuffers(SourceId, 1, new int[1] { bufferId });
@@ -539,7 +546,7 @@ namespace Microsoft.Xna.Framework.Audio
 
             int channels = 1;
             int bytesPerSample = 1;
-            switch (_effect.PcmFormat)
+            switch (_effect.PondFormat)
             {
                 case ALFormat.Mono16:
                     bytesPerSample = 2;
@@ -568,7 +575,7 @@ namespace Microsoft.Xna.Framework.Audio
         public unsafe void FilterBuffer8(int channels)
         {
             // Adapted from https://vincentchoqueuse.github.io/personal_website/tutorials/digital_state_filter.html
-            float filterFrequency = Math.Min((float)(2.0f * Math.Sin(Math.PI * Math.Min(frequency / ((float)_effect.PcmSampleRate), 0.5f))), 1.0f);
+            float filterFrequency = Math.Min((float)(2.0f * Math.Sin(Math.PI * Math.Min(frequency / ((float)_effect.Pond.SampleRate), 0.5f))), 1.0f);
             float oneOverQ = (float)(1.0f / filterQ);
 
             float[] f = new float[3];
@@ -614,7 +621,7 @@ namespace Microsoft.Xna.Framework.Audio
         public unsafe void FilterBuffer16(int channels)
         {
             // Adapted from https://vincentchoqueuse.github.io/personal_website/tutorials/digital_state_filter.html
-            float filterFrequency = Math.Min((float)(2.0f * Math.Sin(Math.PI * Math.Min(frequency / ((float)_effect.PcmSampleRate), 0.5f))), 1.0f);
+            float filterFrequency = Math.Min((float)(2.0f * Math.Sin(Math.PI * Math.Min(frequency / ((float)_effect.Pond.SampleRate), 0.5f))), 1.0f);
             float oneOverQ = (float)(1.0f / filterQ);
 
             float[] f = new float[3];

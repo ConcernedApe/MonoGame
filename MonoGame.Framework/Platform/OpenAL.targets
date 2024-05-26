@@ -9,6 +9,7 @@
     <Compile Include="Platform\Audio\OALSoundBuffer.cs" />
     <Compile Include="Platform\Audio\OpenAL.cs" />
     <Compile Include="Platform\Audio\OpenALSoundController.cs" />
+    <Compile Include="Platform\Audio\RTAP.cs" />
     <Compile Include="Platform\Audio\SoundEffect.OAL.cs" />
     <Compile Include="Platform\Audio\SoundEffectInstance.OAL.cs" />
   </ItemGroup>

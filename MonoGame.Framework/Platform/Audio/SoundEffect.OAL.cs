@@ -8,6 +8,7 @@ using System.IO;
 
 #if OPENAL
 using MonoGame.OpenAL;
+using RTAudioProcessing;
 #endif
 #if IOS
 using AudioToolbox;
@@ -22,11 +23,26 @@ namespace Microsoft.Xna.Framework.Audio
         internal static uint ReverbSlot = 0;
         internal static uint ReverbEffect = 0;
 
-        internal byte[] PcmBuffer;
-        internal int PcmLength;
-        internal ALFormat PcmFormat;
-        internal int PcmSampleRate;
-        internal double PcmDuration;
+        internal RtapPond Pond = null;
+        internal ALFormat PondFormat = ALFormat.Mono8;
+
+        private static ALFormat RtapToAlFormat(RtapFormat rtapFormat)
+        {
+            switch (rtapFormat)
+            {
+                case RtapFormat.Mono16:
+                    return ALFormat.Mono16;
+
+                case RtapFormat.Stereo8:
+                    return ALFormat.Stereo8;
+
+                case RtapFormat.Stereo16:
+                    return ALFormat.Stereo16;
+
+                default:
+                    return ALFormat.Mono8;
+            }
+        }
 
         #region Public Constructors
 
@@ -59,13 +75,22 @@ namespace Microsoft.Xna.Framework.Audio
                 sampleBits = 16;
             }
 
-            PcmBuffer = buffer;
-            PcmLength = buffer.Length;
-            PcmFormat = AudioLoader.GetSoundFormat(AudioLoader.FormatPcm, (int)channels, sampleBits);
-            PcmSampleRate = sampleRate;
+            bool stereo = (((int)channels) == 2);
 
-            // To-Myuu: implement duration calculation for PCM 
-            PcmDuration = 0.0;
+            RtapFormat rtapFormat = RtapFormat.Mono8;
+            if (sampleBits == 16)
+            {
+                rtapFormat = stereo
+                    ? RtapFormat.Stereo16
+                    : RtapFormat.Mono16;
+            }
+            else if (stereo)
+            {
+                rtapFormat = RtapFormat.Stereo8;
+            }
+            PondFormat = RtapToAlFormat(rtapFormat);
+
+            Pond = new RtapPond(buffer, rtapFormat, sampleRate, 0);
         }
 
         private void PlatformInitializeIeeeFloat(byte[] buffer, int offset, int count, int sampleRate, AudioChannels channels, int loopStart, int loopLength)
@@ -131,7 +156,7 @@ namespace Microsoft.Xna.Framework.Audio
             if (codec == MiniFormatTag.Adpcm)
             {
                 PlatformInitializeAdpcm(buffer, 0, buffer.Length, sampleRate, (AudioChannels)channels, (blockAlignment + 22) * channels, loopStart, loopLength);
-                duration = TimeSpan.FromSeconds(PcmDuration);
+                duration = TimeSpan.FromSeconds(Pond.Duration);
                 return;
             }
 
@@ -197,7 +222,7 @@ namespace Microsoft.Xna.Framework.Audio
 
         private void PlatformDispose(bool disposing)
         {
-            // To-Myuu: Implement releasing the buffers from memory
+            Pond.Dispose();
         }
 
 #endregion
