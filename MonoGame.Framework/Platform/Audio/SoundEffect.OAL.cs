@@ -104,6 +104,15 @@ namespace Microsoft.Xna.Framework.Audio
         {
             buffer = AudioLoader.ConvertMsAdpcmToPcm(buffer, offset, count, (int)channels, blockAlignment);
             PlatformInitializePcm(buffer, 0, buffer.Length, 16, sampleRate, channels, loopStart, loopLength);
+
+            return;
+
+            RtapFormat rtapFormat = (((int)channels) == 2)
+                ? RtapFormat.StereoMSAdpcm
+                : RtapFormat.MonoMSAdpcm;
+            PondFormat = RtapToAlFormat(rtapFormat);
+
+            Pond = new RtapPond(buffer, rtapFormat, sampleRate, blockAlignment);
         }
 
         private void PlatformInitializeIma4(byte[] buffer, int offset, int count, int sampleRate, AudioChannels channels, int blockAlignment, int loopStart, int loopLength)

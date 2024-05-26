@@ -7,6 +7,7 @@ using System.IO;
 #if !FAUDIO
 using MonoGame.OpenAL;
 #endif
+using RTAudioProcessing;
 using System.Runtime.InteropServices;
 
 namespace Microsoft.Xna.Framework.Audio
@@ -61,7 +62,7 @@ namespace Microsoft.Xna.Framework.Audio
 
         internal static byte[] ConvertMsAdpcmToPcm(byte[] bufferArr, int offset, int count, int channelCount, int blockAlignment)
         {
-            return ConvertMsAdpcmToPcmOriginal(bufferArr, offset, count, channelCount, blockAlignment);
+            return ConvertMsAdpcmToPcmNew(bufferArr, offset, count, channelCount, blockAlignment);
         }
 
         // Convert buffer containing MS-ADPCM wav data to a 16-bit signed PCM buffer
@@ -133,7 +134,7 @@ namespace Microsoft.Xna.Framework.Audio
                 }
 
                 int consumed = (stereo + 1) + ((stereo + 1) << 1) * 3;
-                int sampled = 4 * (stereo + 1);
+                int sampled = (stereo + 1) << 2;
 
                 blockSize -= consumed;
                 for (int i = 0; i < blockSize; ++i)
@@ -149,7 +150,7 @@ namespace Microsoft.Xna.Framework.Audio
                     samples[sampled + (i << 2) + 3] = (byte)(sample >> 8);
                 }
 
-                samples += sampled + blockSize << 2;
+                samples += sampled + (blockSize << 2);
                 buffer += consumed + blockSize;
             }
             }
