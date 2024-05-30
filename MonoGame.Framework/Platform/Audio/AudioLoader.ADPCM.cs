@@ -32,11 +32,11 @@ namespace Microsoft.Xna.Framework.Audio
                 ? RtapFormat.StereoMSAdpcm
                 : RtapFormat.MonoMSAdpcm;
 
-            using(RtapPond pond = new RtapPond(bufferArr, rtapFormat, 0, blockAlignment))
+            using(RtapSpring spring = new RtapSpring(bufferArr, rtapFormat, 0, blockAlignment))
             using(RtapRiver river = new RtapRiver())
             {
-                river.SetPond(pond);
-                s1 = new byte[pond.Length];
+                river.SetSpring(spring);
+                s1 = new byte[spring.Length];
 
                 fixed (byte* b2 = s2)
                 fixed (byte* samples = s1)

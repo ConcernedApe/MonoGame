@@ -87,9 +87,9 @@ namespace RTAudioProcessing
 
         private static unsafe int rtap_river_read_adpcm_helper(RTAPRiver* _this, byte* dest, int dest_size)
         {
-            RTAPPond* pond = (RTAPPond*)(_this->pond);
+            RTAPSpring* spring = (RTAPSpring*)(_this->spring);
 
-            int STEREO = ((pond->format & FLAG_STEREO) == 0) ? 0 : 1;
+            int STEREO = ((spring->format & FLAG_STEREO) == 0) ? 0 : 1;
             int HEADER_SIZE = (STEREO + 1) + ((STEREO + 1) << 1) * 3;
             int HEADER_DBYTES = (STEREO + 1) << 2;
 
@@ -114,11 +114,11 @@ namespace RTAudioProcessing
             byte* cache = stackalloc byte[8];
             int cache_size = 0;
 
-            byte* buffer = (byte*)(pond->data);
-            int block_align = pond->block_align;
+            byte* buffer = (byte*)(spring->data);
+            int block_align = spring->block_align;
 
             int read_head = _this->read_head;
-            int data_size = pond->data_size;
+            int data_size = spring->data_size;
 
             while (read_head < data_size && dest_size > 0)
             {

@@ -14,7 +14,7 @@ namespace RTAudioProcessing
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    internal struct RTAPPond
+    internal struct RTAPSpring
     {
         public IntPtr data;
         public int data_size;
@@ -26,7 +26,7 @@ namespace RTAudioProcessing
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     internal struct RTAPRiver
     {
-        public IntPtr pond;
+        public IntPtr spring;
         public int read_head;
         public int cache_size;
         public int l_coeff1;
@@ -55,22 +55,22 @@ namespace RTAudioProcessing
         internal const int FLAG_STEREO = 1 << 1;
         internal const int FLAG_ADPCM = 1 << 2;
 
-        private static int ALLOC_SIZE_POND;
+        private static int ALLOC_SIZE_SPRING;
         private static int ALLOC_SIZE_RIVER;
 
         private static int RIVER_CACHE_OFFSET;
 
         static RTAP()
         {
-            ALLOC_SIZE_POND = rtap_alloc_size_for_pond();
+            ALLOC_SIZE_SPRING = rtap_alloc_size_for_spring();
             ALLOC_SIZE_RIVER = rtap_alloc_size_for_river();
             
             RIVER_CACHE_OFFSET = (int)Marshal.OffsetOf(typeof(RTAPRiver), "cache0");
         }
 
-        internal static int rtap_alloc_size_for_pond()
+        internal static int rtap_alloc_size_for_spring()
         {
-            return Marshal.SizeOf(typeof(RTAPPond));
+            return Marshal.SizeOf(typeof(RTAPSpring));
         }
 
         internal static int rtap_alloc_size_for_river()
@@ -78,49 +78,49 @@ namespace RTAudioProcessing
             return Marshal.SizeOf(typeof(RTAPRiver));
         }
 
-        internal unsafe static void rtap_pond_init(IntPtr _this, IntPtr data_ptr, int data_size, int format, int sample_rate, int block_align)
+        internal unsafe static void rtap_spring_init(IntPtr _this, IntPtr data_ptr, int data_size, int format, int sample_rate, int block_align)
         {
             if (_this == IntPtr.Zero)
-                throw new InvalidOperationException("rtap_pond_init(...) called on a NULL pointer.");
+                throw new InvalidOperationException("rtap_spring_init(...) called on a NULL pointer.");
 
-            RTAPPond* pond = (RTAPPond*)_this;
-            pond->data = data_ptr;
-            pond->data_size = data_size;
-            pond->format = format;
-            pond->sample_rate = sample_rate;
-            pond->block_align = block_align;
+            RTAPSpring* spring = (RTAPSpring*)_this;
+            spring->data = data_ptr;
+            spring->data_size = data_size;
+            spring->format = format;
+            spring->sample_rate = sample_rate;
+            spring->block_align = block_align;
         }
 
-        internal unsafe static int rtap_pond_get_length(IntPtr _this)
+        internal unsafe static int rtap_spring_get_length(IntPtr _this)
         {
             if (_this == IntPtr.Zero)
-                throw new InvalidOperationException("rtap_get_length(...) called on a NULL pointer.");
+                throw new InvalidOperationException("rtap_spring_get_length(...) called on a NULL pointer.");
 
-            RTAPPond* pond = (RTAPPond*)_this;
-            if ((pond->format & FLAG_ADPCM) == 0)
-                return pond->data_size;
+            RTAPSpring* spring = (RTAPSpring*)_this;
+            if ((spring->format & FLAG_ADPCM) == 0)
+                return spring->data_size;
 
-            int stereo = ((pond->format & FLAG_STEREO) == 0) ? 0 : 1;
+            int stereo = ((spring->format & FLAG_STEREO) == 0) ? 0 : 1;
 
-            int full_block_samples = (((pond->block_align >> stereo) - 7) << 1) + 2;
-            int partial_block_bytes = (pond->data_size % pond->block_align);
+            int full_block_samples = (((spring->block_align >> stereo) - 7) << 1) + 2;
+            int partial_block_bytes = (spring->data_size % spring->block_align);
             int partial_block_samples = 0;
             if (partial_block_bytes > 0)
                 partial_block_samples = (((partial_block_bytes >> stereo) - 7) << 1) + 2;
             if (partial_block_samples < 2)
                 partial_block_samples = 0;
 
-            int total_samples = ((pond->data_size / pond->block_align) * full_block_samples) + partial_block_samples;
+            int total_samples = ((spring->data_size / spring->block_align) * full_block_samples) + partial_block_samples;
 
             return total_samples * sizeof(short) * (stereo + 1);
         }
 
-        internal unsafe static void rtap_river_init(IntPtr _this, IntPtr pond_ptr)
+        internal unsafe static void rtap_river_init(IntPtr _this, IntPtr spring_ptr)
         {
             if (_this == IntPtr.Zero)
                 throw new InvalidOperationException("rtap_river_init(...) called on a NULL pointer.");
 
-            rtap_river_set_pond(_this, pond_ptr);
+            rtap_river_set_spring(_this, spring_ptr);
         }
 
         internal unsafe static void rtap_river_reset(IntPtr _this)
@@ -128,20 +128,20 @@ namespace RTAudioProcessing
             if (_this == IntPtr.Zero)
                 throw new InvalidOperationException("rtap_river_reset(...) called on a NULL pointer.");
 
-            rtap_river_set_pond(_this, IntPtr.Zero);
+            rtap_river_set_spring(_this, IntPtr.Zero);
         }
 
-        internal unsafe static void rtap_river_set_pond(IntPtr _this, IntPtr pond_ptr)
+        internal unsafe static void rtap_river_set_spring(IntPtr _this, IntPtr spring_ptr)
         {
             if (_this == IntPtr.Zero)
-                throw new InvalidOperationException("rtap_river_set_pond(...) called on a NULL pointer.");
+                throw new InvalidOperationException("rtap_river_set_spring(...) called on a NULL pointer.");
 
             byte* memory = (byte*)_this;
             for (int i = 0; i < ALLOC_SIZE_RIVER; ++i)
                 memory[i] = (byte)0x0;
 
             RTAPRiver* river = (RTAPRiver*)_this;
-            river->pond = pond_ptr;
+            river->spring = spring_ptr;
             river->read_head = 0;
         }
 
@@ -154,9 +154,9 @@ namespace RTAudioProcessing
             }
 
             RTAPRiver* river = (RTAPRiver*)_this;
-            if (river->pond == IntPtr.Zero)
+            if (river->spring == IntPtr.Zero)
             {
-                throw new InvalidOperationException("rtap_river_read_into(...) called on a river with a NULL pond pointer.");
+                throw new InvalidOperationException("rtap_river_read_into(...) called on a river with a NULL spring pointer.");
                 return -1;
             }
 
@@ -166,10 +166,10 @@ namespace RTAudioProcessing
                 return -1;
             }
 
-            RTAPPond* pond = (RTAPPond*)(river->pond);
-            if ((pond->format & FLAG_ADPCM) == 0)
+            RTAPSpring* spring = (RTAPSpring*)(river->spring);
+            if ((spring->format & FLAG_ADPCM) == 0)
             {
-                Buffer.MemoryCopy((void*)(((byte*)pond->data) + start_idx), (void*)buffer_ptr, length, length);
+                Buffer.MemoryCopy((void*)(((byte*)spring->data) + start_idx), (void*)buffer_ptr, length, length);
             }
             else
             {
@@ -182,16 +182,16 @@ namespace RTAudioProcessing
         private unsafe static void rtap_river_read_adpcm(RTAPRiver* _this, IntPtr buffer_ptr, int start_idx, int length)
         {
             // This method is only called internally, so we perform no validation
-            RTAPPond* pond = (RTAPPond*)(_this->pond);
+            RTAPSpring* spring = (RTAPSpring*)(_this->spring);
             byte* dest = (byte*)buffer_ptr;
             byte* river_cache = ((byte*)_this) + RIVER_CACHE_OFFSET;
 
             int dest_size = length;
 
-            int stereo = ((pond->format & FLAG_STEREO) == 0) ? 0 : 1;
+            int stereo = ((spring->format & FLAG_STEREO) == 0) ? 0 : 1;
             int read_head = _this->read_head;
-            int block_align = pond->block_align;
-            int data_size = pond->data_size;
+            int block_align = spring->block_align;
+            int data_size = spring->data_size;
 
             int samples_per_block = (((block_align >> stereo) - 7) << 1) + 2;
             int dbytes_per_block = (samples_per_block << stereo) * sizeof(short);
@@ -262,13 +262,13 @@ namespace RTAudioProcessing
         }
     }
 
-    public sealed class RtapPond : IDisposable
+    public sealed class RtapSpring : IDisposable
     {
-        private static readonly int PondSizeInBytes;
+        private static readonly int SpringSizeInBytes;
 
         private bool disposed = false;
 
-        internal IntPtr PondPtr;
+        internal IntPtr SpringPtr;
         internal IntPtr DataPtr;
 
         public readonly int Length;
@@ -276,12 +276,12 @@ namespace RTAudioProcessing
         public readonly int SampleRate;
         public readonly double Duration;
 
-        static RtapPond()
+        static RtapSpring()
         {
-            PondSizeInBytes = RTAP.rtap_alloc_size_for_pond();
+            SpringSizeInBytes = RTAP.rtap_alloc_size_for_spring();
         }
 
-        public RtapPond(byte[] data, RtapFormat format, int sampleRate, int blockAlignment)
+        public RtapSpring(byte[] data, RtapFormat format, int sampleRate, int blockAlignment)
         {
             Format = format;
             SampleRate = sampleRate;
@@ -289,15 +289,15 @@ namespace RTAudioProcessing
             DataPtr = Marshal.AllocHGlobal(data.Length);
             Marshal.Copy(data, 0, DataPtr, data.Length);
 
-            PondPtr = Marshal.AllocHGlobal(PondSizeInBytes);
-            RTAP.rtap_pond_init(PondPtr, DataPtr, data.Length, (int)format, sampleRate, blockAlignment);
+            SpringPtr = Marshal.AllocHGlobal(SpringSizeInBytes);
+            RTAP.rtap_spring_init(SpringPtr, DataPtr, data.Length, (int)format, sampleRate, blockAlignment);
 
-            Length = RTAP.rtap_pond_get_length(PondPtr);
+            Length = RTAP.rtap_spring_get_length(SpringPtr);
             
             Duration = 0.0;
         }
 
-        ~RtapPond()
+        ~RtapSpring()
         {
             Dispose(false);
         }
@@ -312,10 +312,10 @@ namespace RTAudioProcessing
         {
             if (!disposed)
             {
-                Marshal.FreeHGlobal(PondPtr);
+                Marshal.FreeHGlobal(SpringPtr);
                 Marshal.FreeHGlobal(DataPtr);
 
-                PondPtr = IntPtr.Zero;
+                SpringPtr = IntPtr.Zero;
                 DataPtr = IntPtr.Zero;
 
                 disposed = true;
@@ -329,7 +329,7 @@ namespace RTAudioProcessing
 
         private bool disposed = false;
 
-        public RtapPond Pond { get; private set; }
+        public RtapSpring Spring { get; private set; }
 
         internal IntPtr RiverPtr;
 
@@ -357,14 +357,14 @@ namespace RTAudioProcessing
             RTAP.rtap_river_reset(RiverPtr);
         }
 
-        public void SetPond(RtapPond pond)
+        public void SetSpring(RtapSpring spring)
         {
             if (RiverPtr == IntPtr.Zero)
                 return;
 
-            RTAP.rtap_river_set_pond(RiverPtr, ((pond is null) ? IntPtr.Zero : pond.PondPtr));
+            RTAP.rtap_river_set_spring(RiverPtr, ((spring is null) ? IntPtr.Zero : spring.SpringPtr));
 
-            Pond = pond;
+            Spring = spring;
         }
 
         public void ReadInto(IntPtr destination, int startIndex, int length)

@@ -23,8 +23,8 @@ namespace Microsoft.Xna.Framework.Audio
         internal static uint ReverbSlot = 0;
         internal static uint ReverbEffect = 0;
 
-        internal RtapPond Pond = null;
-        internal ALFormat PondFormat = ALFormat.Mono8;
+        internal RtapSpring Spring = null;
+        internal ALFormat SpringFormat = ALFormat.Mono8;
 
         private static ALFormat RtapToAlFormat(RtapFormat rtapFormat)
         {
@@ -90,9 +90,9 @@ namespace Microsoft.Xna.Framework.Audio
             {
                 rtapFormat = RtapFormat.Stereo8;
             }
-            PondFormat = RtapToAlFormat(rtapFormat);
+            SpringFormat = RtapToAlFormat(rtapFormat);
 
-            Pond = new RtapPond(buffer, rtapFormat, sampleRate, 0);
+            Spring = new RtapSpring(buffer, rtapFormat, sampleRate, 0);
         }
 
         private void PlatformInitializeIeeeFloat(byte[] buffer, int offset, int count, int sampleRate, AudioChannels channels, int loopStart, int loopLength)
@@ -114,9 +114,9 @@ namespace Microsoft.Xna.Framework.Audio
             RtapFormat rtapFormat = (((int)channels) == 2)
                 ? RtapFormat.StereoMSAdpcm
                 : RtapFormat.MonoMSAdpcm;
-            PondFormat = RtapToAlFormat(rtapFormat);
+            SpringFormat = RtapToAlFormat(rtapFormat);
 
-            Pond = new RtapPond(buffer, rtapFormat, sampleRate, blockAlignment);
+            Spring = new RtapSpring(buffer, rtapFormat, sampleRate, blockAlignment);
         }
 
         private void PlatformInitializeIma4(byte[] buffer, int offset, int count, int sampleRate, AudioChannels channels, int blockAlignment, int loopStart, int loopLength)
@@ -169,7 +169,7 @@ namespace Microsoft.Xna.Framework.Audio
             if (codec == MiniFormatTag.Adpcm)
             {
                 PlatformInitializeAdpcm(buffer, 0, buffer.Length, sampleRate, (AudioChannels)channels, (blockAlignment + 22) * channels, loopStart, loopLength);
-                duration = TimeSpan.FromSeconds(Pond.Duration);
+                duration = TimeSpan.FromSeconds(Spring.Duration);
                 return;
             }
 
@@ -235,7 +235,7 @@ namespace Microsoft.Xna.Framework.Audio
 
         private void PlatformDispose(bool disposing)
         {
-            Pond?.Dispose();
+            Spring?.Dispose();
         }
 
 #endregion

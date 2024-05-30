@@ -203,7 +203,7 @@ namespace Microsoft.Xna.Framework.Audio
             // Looping
             AL.Source(SourceId, ALSourcei.Buffer, 0);
 
-            River.SetPond(_effect.Pond);
+            River.SetSpring(_effect.Spring);
             QueueBuffers();
 
 			// Pitch
@@ -467,12 +467,12 @@ namespace Microsoft.Xna.Framework.Audio
 
         private unsafe bool QueueBuffer(int bufferId)
         {
-            int pondLength = _effect.Pond.Length;
+            int springLength = _effect.Spring.Length;
 
-            if (BufferHead > pondLength)
+            if (BufferHead > springLength)
                 BufferHead = 0;
 
-            int copySize = pondLength - BufferHead;
+            int copySize = springLength - BufferHead;
             if (copySize > DefaultBufferSize)
                 copySize = DefaultBufferSize;
 
@@ -482,7 +482,7 @@ namespace Microsoft.Xna.Framework.Audio
 
                 int copyHead = copySize;
                 BufferHead += copySize;
-                if (BufferHead >= pondLength)
+                if (BufferHead >= springLength)
                 {
                     BufferHead = 0;
                     TimesPlayed++;
@@ -493,7 +493,7 @@ namespace Microsoft.Xna.Framework.Audio
                 {
                     while (unfilled > 0)
                     {
-                        copySize = pondLength - BufferHead;
+                        copySize = springLength - BufferHead;
                         if (copySize > unfilled)
                             copySize = unfilled;
 
@@ -503,7 +503,7 @@ namespace Microsoft.Xna.Framework.Audio
                         copyHead += copySize;
                         unfilled -= copySize;
 
-                        if (BufferHead >= pondLength)
+                        if (BufferHead >= springLength)
                         {
                             BufferHead = 0;
                             TimesPlayed++;
@@ -531,7 +531,7 @@ namespace Microsoft.Xna.Framework.Audio
 
             fixed (byte* bufferPtr = BufferData)
             {
-                AL.alBufferData((uint)bufferId, (int)_effect.PondFormat, (IntPtr)bufferPtr, DefaultBufferSize, _effect.Pond.SampleRate);
+                AL.alBufferData((uint)bufferId, (int)_effect.SpringFormat, (IntPtr)bufferPtr, DefaultBufferSize, _effect.Spring.SampleRate);
             }
 
             AL.SourceQueueBuffers(SourceId, 1, new int[1] { bufferId });
@@ -546,7 +546,7 @@ namespace Microsoft.Xna.Framework.Audio
 
             int channels = 1;
             int bytesPerSample = 1;
-            switch (_effect.PondFormat)
+            switch (_effect.SpringFormat)
             {
                 case ALFormat.Mono16:
                     bytesPerSample = 2;
@@ -575,7 +575,7 @@ namespace Microsoft.Xna.Framework.Audio
         public unsafe void FilterBuffer8(int channels)
         {
             // Adapted from https://vincentchoqueuse.github.io/personal_website/tutorials/digital_state_filter.html
-            float filterFrequency = Math.Min((float)(2.0f * Math.Sin(Math.PI * Math.Min(frequency / ((float)_effect.Pond.SampleRate), 0.5f))), 1.0f);
+            float filterFrequency = Math.Min((float)(2.0f * Math.Sin(Math.PI * Math.Min(frequency / ((float)_effect.Spring.SampleRate), 0.5f))), 1.0f);
             float oneOverQ = (float)(1.0f / filterQ);
 
             float* f = stackalloc float[3];
@@ -621,7 +621,7 @@ namespace Microsoft.Xna.Framework.Audio
         public unsafe void FilterBuffer16(int channels)
         {
             // Adapted from https://vincentchoqueuse.github.io/personal_website/tutorials/digital_state_filter.html
-            float filterFrequency = Math.Min((float)(2.0f * Math.Sin(Math.PI * Math.Min(frequency / ((float)_effect.Pond.SampleRate), 0.5f))), 1.0f);
+            float filterFrequency = Math.Min((float)(2.0f * Math.Sin(Math.PI * Math.Min(frequency / ((float)_effect.Spring.SampleRate), 0.5f))), 1.0f);
             float oneOverQ = (float)(1.0f / filterQ);
 
             float* f = stackalloc float[3];
