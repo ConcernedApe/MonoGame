@@ -462,7 +462,7 @@ namespace Microsoft.Xna.Framework.Audio
                 BufferIds = null;
                 HasBufferIds = false;
             }
-            River.Dispose();
+            River?.Dispose();
         }
 
         private unsafe bool QueueBuffer(int bufferId)
@@ -578,7 +578,7 @@ namespace Microsoft.Xna.Framework.Audio
             float filterFrequency = Math.Min((float)(2.0f * Math.Sin(Math.PI * Math.Min(frequency / ((float)_effect.Pond.SampleRate), 0.5f))), 1.0f);
             float oneOverQ = (float)(1.0f / filterQ);
 
-            float[] f = new float[3];
+            float* f = stackalloc float[3];
 
             int stereo = (channels != 0) ? 1 : 0;
 
@@ -624,7 +624,7 @@ namespace Microsoft.Xna.Framework.Audio
             float filterFrequency = Math.Min((float)(2.0f * Math.Sin(Math.PI * Math.Min(frequency / ((float)_effect.Pond.SampleRate), 0.5f))), 1.0f);
             float oneOverQ = (float)(1.0f / filterQ);
 
-            float[] f = new float[3];
+            float* f = stackalloc float[3];
 
             int stereo = (channels != 0) ? 1 : 0;
 

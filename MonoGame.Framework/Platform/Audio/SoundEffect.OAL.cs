@@ -31,12 +31,14 @@ namespace Microsoft.Xna.Framework.Audio
             switch (rtapFormat)
             {
                 case RtapFormat.Mono16:
+                case RtapFormat.MonoMSAdpcm:
                     return ALFormat.Mono16;
 
                 case RtapFormat.Stereo8:
                     return ALFormat.Stereo8;
 
                 case RtapFormat.Stereo16:
+                case RtapFormat.StereoMSAdpcm:
                     return ALFormat.Stereo16;
 
                 default:
@@ -102,10 +104,12 @@ namespace Microsoft.Xna.Framework.Audio
 
         private void PlatformInitializeAdpcm(byte[] buffer, int offset, int count, int sampleRate, AudioChannels channels, int blockAlignment, int loopStart, int loopLength)
         {
-            buffer = AudioLoader.ConvertMsAdpcmToPcm(buffer, offset, count, (int)channels, blockAlignment);
-            PlatformInitializePcm(buffer, 0, buffer.Length, 16, sampleRate, channels, loopStart, loopLength);
-
-            return;
+            if (false)
+            {
+                buffer = AudioLoader.ConvertMsAdpcmToPcm(buffer, offset, count, (int)channels, blockAlignment);
+                PlatformInitializePcm(buffer, 0, buffer.Length, 16, sampleRate, channels, loopStart, loopLength);
+                return;
+            }
 
             RtapFormat rtapFormat = (((int)channels) == 2)
                 ? RtapFormat.StereoMSAdpcm
@@ -231,7 +235,7 @@ namespace Microsoft.Xna.Framework.Audio
 
         private void PlatformDispose(bool disposing)
         {
-            Pond.Dispose();
+            Pond?.Dispose();
         }
 
 #endregion
