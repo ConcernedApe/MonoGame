@@ -173,6 +173,9 @@ namespace Microsoft.Xna.Framework.Audio
                         {
                             FinishedAction();
                         }
+#if !FAUDIO
+                        _instance.FinishedQueueing();
+#endif
                     }
 
                     return;

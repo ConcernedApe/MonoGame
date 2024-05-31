@@ -12,6 +12,12 @@ namespace Microsoft.Xna.Framework.Audio
     {
         private Queue<OALSoundBuffer> _queuedBuffers;
         private ALFormat _format;
+        private bool _finishedQueueing = false;
+
+        internal void FinishedQueueing()
+        {
+            _finishedQueueing = true;
+        }
 
         private void PlatformCreate()
         {
@@ -89,9 +95,9 @@ namespace Microsoft.Xna.Framework.Audio
             }
 
             // Queue the buffer
+            _queuedBuffers.Enqueue(oalBuffer);
             AL.SourceQueueBuffer(SourceId, oalBuffer.OpenALDataBuffer);
             ALHelper.CheckError();
-            _queuedBuffers.Enqueue(oalBuffer);
 
             // If the source has run out of buffers, restart it
             var sourceState = AL.GetSourceState(SourceId);
@@ -142,6 +148,9 @@ namespace Microsoft.Xna.Framework.Audio
             // Raise the event for each removed buffer, if needed
             for (int i = 0; i < numBuffers; i++)
                 CheckBufferCount();
+
+            if (_queuedBuffers.Count == 0 && _finishedQueueing)
+                Stop(true);
         }
     }
 }

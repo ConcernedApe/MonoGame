@@ -334,7 +334,7 @@ namespace Microsoft.Xna.Framework.Audio
                     break;
 
                 case ALSourceState.Stopped:
-                    if (BufferFinished)
+                    if (SoundState != SoundState.Playing || BufferFinished)
                         SoundState = SoundState.Stopped;
                     break;
 

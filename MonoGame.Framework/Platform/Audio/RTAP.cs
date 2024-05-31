@@ -13,42 +13,6 @@ namespace RTAudioProcessing
         StereoMSAdpcm = RTAP.FLAG_ADPCM | RTAP.FLAG_STEREO | RTAP.FLAG_16
     }
 
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    internal struct RTAPSpring
-    {
-        public IntPtr data;
-        public int data_size;
-        public int format;
-        public int sample_rate;
-        public int block_align;
-    }
-
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    internal struct RTAPRiver
-    {
-        public IntPtr spring;
-        public int read_head;
-        public int cache_size;
-        public int l_coeff1;
-        public int l_coeff2;
-        public int l_delta;
-        public int l_sample1;
-        public int l_sample2;
-        public int r_coeff1;
-        public int r_coeff2;
-        public int r_delta;
-        public int r_sample1;
-        public int r_sample2;
-        public byte cache0;
-        public byte cache1;
-        public byte cache2;
-        public byte cache3;
-        public byte cache4;
-        public byte cache5;
-        public byte cache6;
-        public byte cache7;
-    }
-
     internal static partial class RTAP
     {
         internal const int FLAG_16 = 1;
@@ -59,6 +23,42 @@ namespace RTAudioProcessing
         private static int ALLOC_SIZE_RIVER;
 
         private static int RIVER_CACHE_OFFSET;
+
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        private struct RTAPSpring
+        {
+            public IntPtr data;
+            public int data_size;
+            public int format;
+            public int sample_rate;
+            public int block_align;
+        }
+
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        private struct RTAPRiver
+        {
+            public IntPtr spring;
+            public int read_head;
+            public int cache_size;
+            public int l_coeff1;
+            public int l_coeff2;
+            public int l_delta;
+            public int l_sample1;
+            public int l_sample2;
+            public int r_coeff1;
+            public int r_coeff2;
+            public int r_delta;
+            public int r_sample1;
+            public int r_sample2;
+            public byte cache0;
+            public byte cache1;
+            public byte cache2;
+            public byte cache3;
+            public byte cache4;
+            public byte cache5;
+            public byte cache6;
+            public byte cache7;
+        }
 
         static RTAP()
         {
@@ -113,6 +113,25 @@ namespace RTAudioProcessing
             int total_samples = ((spring->data_size / spring->block_align) * full_block_samples) + partial_block_samples;
 
             return total_samples * sizeof(short) * (stereo + 1);
+        }
+
+        internal unsafe static double rtap_spring_get_duration(IntPtr _this)
+        {
+            if (_this == IntPtr.Zero)
+                throw new InvalidOperationException("rtap_spring_get_duration(...) called on a NULL pointer.");
+
+            RTAPSpring* spring = (RTAPSpring*)_this;
+
+            double divisor = spring->sample_rate;
+            if ((spring->format & FLAG_16) != 0)
+                divisor *= 2.0f;
+            if ((spring->format & FLAG_STEREO) != 0)
+                divisor *= 2.0f;
+
+            if (divisor <= 0.00001)
+                return 0.0f;
+
+            return ((double)spring->data_size) / divisor;
         }
 
         internal unsafe static void rtap_river_init(IntPtr _this, IntPtr spring_ptr)
@@ -294,7 +313,7 @@ namespace RTAudioProcessing
 
             Length = RTAP.rtap_spring_get_length(SpringPtr);
             
-            Duration = 0.0;
+            Duration = RTAP.rtap_spring_get_duration(SpringPtr);
         }
 
         ~RtapSpring()
