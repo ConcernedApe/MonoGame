@@ -14,7 +14,7 @@ namespace Microsoft.Xna.Framework.Audio
         private ALFormat _format;
         private bool _finishedQueueing = false;
 
-        internal void FinishedQueueing()
+        public void FinishedQueueing()
         {
             _finishedQueueing = true;
         }
@@ -37,6 +37,8 @@ namespace Microsoft.Xna.Framework.Audio
 
         private void PlatformPlay()
         {
+            _finishedQueueing = false;
+
             AL.GetError();
 
             // Ensure that the source is not looped (due to source recycling)
@@ -63,6 +65,8 @@ namespace Microsoft.Xna.Framework.Audio
 
         private void PlatformStop()
         {
+            _finishedQueueing = true;
+
             AL.GetError();
             AL.SourceStop(SourceId);
             ALHelper.CheckError("Failed to stop the source.");

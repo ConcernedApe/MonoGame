@@ -14,6 +14,12 @@ namespace Microsoft.Xna.Framework.Audio
 
         private List<IntPtr> queuedBuffers;
         private List<uint> queuedSizes;
+        private bool _finishedQueueing;
+
+        public void FinishedQueueing()
+        {
+            _finishedQueueing = true;
+        }
 
         private void PlatformCreate()
         {
@@ -41,6 +47,7 @@ namespace Microsoft.Xna.Framework.Audio
 
         private void PlatformPlay()
         {
+            _finishedQueueing = false;
             base.Play();
         }
 
@@ -56,6 +63,7 @@ namespace Microsoft.Xna.Framework.Audio
         
         private void PlatformStop()
         {
+            _finishedQueueing = true;
             base.Stop();
         }
 
@@ -162,7 +170,7 @@ namespace Microsoft.Xna.Framework.Audio
                 // Raise the event for each removed buffer, if needed
                 CheckBufferCount();
 
-                if (state.BuffersQueued == 0)
+                if (state.BuffersQueued == 0 && _finishedQueueing)
                 {
                     Stop(true);
                 }
