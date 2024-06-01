@@ -94,6 +94,7 @@ namespace Microsoft.Xna.Framework.Audio
         private const int DEFAULT_UPDATE_BUFFER_COUNT = 2;
 #elif DESKTOPGL
         private static OggStreamer _oggstreamer;
+        private static OpenALSoundEffectInstanceManager _openALSoundEffectInstanceManager;
 #endif
         private List<int> availableSourcesCollection;
         private List<int> inUseSourcesCollection;
@@ -307,6 +308,8 @@ namespace Microsoft.Xna.Framework.Audio
                     throw (new NoAudioHardwareException("Failed to init OpenALSoundController", ex));
                 }
             }
+            if (_openALSoundEffectInstanceManager is null)
+                _openALSoundEffectInstanceManager = new OpenALSoundEffectInstanceManager();
         }
 
 
@@ -337,6 +340,11 @@ namespace Microsoft.Xna.Framework.Audio
 
         public static void DestroyInstance()
         {
+            if (!(_openALSoundEffectInstanceManager is null))
+            {
+                _openALSoundEffectInstanceManager.Dispose();
+                _openALSoundEffectInstanceManager = null;
+            }
             if (_instance != null)
             {
                 _instance.Dispose();

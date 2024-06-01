@@ -155,8 +155,6 @@ namespace Microsoft.Xna.Framework.Audio
 
         private void PlatformPlay()
         {
-            DynamicSoundEffectInstanceManager.AddInstance(this);
-
             if (!HasBufferIds)
             {
                 BufferIds = AL.GenBuffers(DefaultBufferCount);
@@ -241,11 +239,10 @@ namespace Microsoft.Xna.Framework.Audio
 
         private void PlatformStop(bool immediate)
         {
-            DynamicSoundEffectInstanceManager.RemoveInstance(this);
-
             FreeSource();
             SoundState = SoundState.Stopped;
             _filterEnabled = false;
+            BufferFinished = true;
         }
 
         private void FreeSource()

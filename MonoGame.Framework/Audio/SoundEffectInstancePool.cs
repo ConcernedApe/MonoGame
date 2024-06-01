@@ -8,10 +8,10 @@ namespace Microsoft.Xna.Framework.Audio
 {
     internal static class SoundEffectInstancePool
     {
-        private static readonly List<SoundEffectInstance> _playingInstances;
+        internal static readonly List<SoundEffectInstance> _playingInstances;
         private static readonly List<SoundEffectInstance> _pooledInstances;
 
-        private static readonly object _locker;
+        internal static readonly object _locker;
 
         static SoundEffectInstancePool()
         {
