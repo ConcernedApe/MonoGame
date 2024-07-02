@@ -17,7 +17,22 @@ namespace Microsoft.Xna.Framework.Audio
         /// <summary>
         /// This value has no effect on DynamicSoundEffectInstance, but can be used by the sound effect's data provider to handle looping.
         /// </summary>
-        public override uint LoopCount { get; set; }
+        public override bool IsLooped
+        {
+            get
+            {
+                return _looped;
+            }
+
+            set
+            {
+                AssertNotDisposed();
+                _looped = value;
+
+                //if (value == true)
+                //throw new InvalidOperationException("IsLooped cannot be set true. Submit looped audio data to implement looping.");
+            }
+        }
 
         public override SoundState State
         {
@@ -55,6 +70,9 @@ namespace Microsoft.Xna.Framework.Audio
         private int _sampleRate;
         private AudioChannels _channels;
         private SoundState _state;
+        private int _sampleAlignment;
+        private bool _msadpcm;
+        private bool _looped;
 
         #region Public Constructor
 
@@ -62,20 +80,28 @@ namespace Microsoft.Xna.Framework.Audio
         /// <param name="channels">Number of channels (mono or stereo).</param>
         public DynamicSoundEffectInstance(int sampleRate, AudioChannels channels)
         {
-            SoundEffect.Initialize();
-            if (SoundEffect._systemState != SoundEffect.SoundSystemState.Initialized)
-                throw new NoAudioHardwareException("Audio has failed to initialize. Call SoundEffect.Initialize() before sound operation to get more specific errors.");
+            Construct(false, 0, sampleRate, channels);
+        }
 
+        internal DynamicSoundEffectInstance(bool msadpcm, int blockAlignment, int sampleRate, AudioChannels channels)
+        {
+            Construct(msadpcm, blockAlignment, sampleRate, channels);
+        }
+
+        private void Construct(bool msadpcm, int blockAlignment, int sampleRate, AudioChannels channels)
+        {
             if ((sampleRate < 8000) || (sampleRate > 48000))
                 throw new ArgumentOutOfRangeException("sampleRate");
             if ((channels != AudioChannels.Mono) && (channels != AudioChannels.Stereo))
                 throw new ArgumentOutOfRangeException("channels");
 
+            _msadpcm = msadpcm;
             _sampleRate = sampleRate;
             _channels = channels;
             _state = SoundState.Stopped;
+            _sampleAlignment = blockAlignment; 
             PlatformCreate();
-            
+
             // This instance is added to the pool so that its volume reflects master volume changes
             // and it contributes to the playing instances limit, but the source/voice is not owned by the pool.
             _isPooled = false;

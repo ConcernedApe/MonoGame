@@ -60,6 +60,9 @@ namespace Microsoft.Xna.Framework.Audio
         {
             var stream = TitleContainer.OpenStream(filePath);
 
+            if (Path.IsPathRooted(filePath))
+                return stream;
+
             // Read the asset into memory in one go. This results in a ~50% reduction
             // in load times on Android due to slow Android asset streams.
 #if ANDROID

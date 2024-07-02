@@ -103,8 +103,8 @@ namespace Microsoft.Xna.Framework.Graphics
                 throw new ArgumentException("Texture arrays are not supported on this graphics device", "arraySize");
 
             this.GraphicsDevice = graphicsDevice;
-            this.width = width;
-            this.height = height;
+            this.width = this.ActualWidth = width;
+            this.height = this.ActualHeight = height;
             this.TexelWidth = 1f / (float)width;
             this.TexelHeight = 1f / (float)height;
 
@@ -120,7 +120,7 @@ namespace Microsoft.Xna.Framework.Graphics
         }
 
         /// <summary>
-        /// Gets the width of the texture in pixels.
+        /// Gets the width of the texture image data in pixels.
         /// </summary>
         public int Width
         {
@@ -131,7 +131,7 @@ namespace Microsoft.Xna.Framework.Graphics
         }
 
         /// <summary>
-        /// Gets the height of the texture in pixels.
+        /// Gets the height of the texture image data in pixels.
         /// </summary>
         public int Height
         {
@@ -139,6 +139,29 @@ namespace Microsoft.Xna.Framework.Graphics
             {
                 return height;
             }
+        }
+
+        /// <summary>
+        /// Gets the width of the allocated texture data in pixels.
+        /// </summary>
+        public int ActualWidth { get; private set; }
+
+        /// <summary>
+        /// Gets the height of the allocated texture data in pixels.
+        /// </summary>
+        public int ActualHeight { get; private set; }
+
+        /// <summary>
+        /// Gets the image data size of the texture which could
+        /// be smaller than the allocated texture data size.
+        /// </summary>
+        public void SetImageSize(int width, int height)
+        {
+            ActualWidth = this.width;
+            ActualHeight = this.height;
+
+            this.width = width;
+            this.height = height;
         }
 
         /// <summary>
@@ -374,7 +397,7 @@ namespace Microsoft.Xna.Framework.Graphics
         private void ValidateParams<T>(int level, int arraySlice, Rectangle? rect, T[] data,
             int startIndex, int elementCount, out Rectangle checkedRect) where T : struct
         {
-            var textureBounds = new Rectangle(0, 0, Math.Max(width >> level, 1), Math.Max(height >> level, 1));
+            var textureBounds = new Rectangle(0, 0, Math.Max(ActualWidth >> level, 1), Math.Max(ActualHeight >> level, 1));
             checkedRect = rect ?? textureBounds;
             if (level < 0 || level >= LevelCount)
                 throw new ArgumentException("level must be smaller than the number of levels in this texture.", "level");

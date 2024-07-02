@@ -182,6 +182,21 @@ namespace Microsoft.Xna.Framework {
 			_viewController.Title = title;
 		}
 
-		#endregion GameWindow Members
-	}
+        public override Rectangle GetDisplayBounds(int index)
+        {
+            return ClientBounds;
+        }
+
+        public override bool CenterOnDisplay(int index)
+        {
+            return true;
+        }
+
+        public override int GetDisplayIndex()
+        {
+            return 0;
+        }
+
+        #endregion GameWindow Members
+    }
 }

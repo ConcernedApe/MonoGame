@@ -22,10 +22,34 @@ namespace Microsoft.Xna.Framework.Content
 			Texture2D texture = null;
 
             var surfaceFormat = (SurfaceFormat)reader.ReadInt32();
-            int width = reader.ReadInt32();
-            int height = reader.ReadInt32();
+
+            int width, height;
+            int contentWidth, contentHeight;
+            {
+                uint packedWidth = reader.ReadUInt32();
+                uint packedHeight = reader.ReadUInt32();
+
+                if ((packedWidth & 0xFFFF0000) == 0)
+                    width = contentWidth = (int)packedWidth;
+                else
+                {
+                    contentWidth = (int)((packedWidth & 0xFFFF0000) >> 16);
+                    width = (int)(packedWidth & 0x0000FFFF);
+                }
+
+                if ((packedHeight & 0xFFFF0000) == 0)
+                    height = contentHeight = (int)packedHeight;
+                else
+                {
+                    contentHeight = (int)((packedHeight & 0xFFFF0000) >> 16);
+                    height = (int)(packedHeight & 0x0000FFFF);
+                }
+            }
+
             int levelCount = reader.ReadInt32();
             int levelCountOutput = levelCount;
+
+
 
             // If the system does not fully support Power of Two textures,
             // skip any mip maps supplied with any non PoT textures.
@@ -65,6 +89,10 @@ namespace Microsoft.Xna.Framework.Content
 			}
 			
             texture = existingInstance ?? new Texture2D(reader.GetGraphicsDevice(), width, height, levelCountOutput > 1, convertedFormat);
+
+            if (contentWidth != width || contentHeight != height)
+                texture.SetImageSize(contentWidth, contentHeight);
+
 #if OPENGL
             Threading.BlockOnUIThread(() =>
             {

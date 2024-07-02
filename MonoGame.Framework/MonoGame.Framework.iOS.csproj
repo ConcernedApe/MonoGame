@@ -1,4 +1,4 @@
-<Project Sdk="MSBuild.Sdk.Extras">
+<Project Sdk="MSBuild.Sdk.Extras/3.0.23">
 
   <PropertyGroup>
     <TargetFramework>xamarinios10</TargetFramework>
@@ -27,6 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Audio\Xact\WaveBank.Default.cs" />
     <Compile Remove="GraphicsDeviceManager.cs" />
     <Compile Remove="Graphics\GraphicsAdapter.cs" />
     <Compile Remove="Graphics\OcclusionQuery.cs" />

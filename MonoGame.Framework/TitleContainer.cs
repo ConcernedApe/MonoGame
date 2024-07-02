@@ -34,8 +34,10 @@ namespace Microsoft.Xna.Framework
                 throw new ArgumentNullException("name");
 
             // We do not accept absolute paths here.
+#if !ANDROID
             if (Path.IsPathRooted(name))
                 throw new ArgumentException("Invalid filename. TitleContainer.OpenStream requires a relative path.", name);
+#endif
 
             // Normalize the file path.
             var safeName = NormalizeRelativePath(name);

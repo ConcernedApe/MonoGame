@@ -679,6 +679,21 @@ namespace MonoGame.Framework
 
             _switchingFullScreen = false;
         }
+
+        public override Rectangle GetDisplayBounds(int index)
+        {
+            return Rectangle.Empty;
+        }
+
+        public override bool CenterOnDisplay(int index)
+        {
+            return true;
+        }
+
+        public override int GetDisplayIndex()
+        {
+            return 0;
+        }
     }
 }
 

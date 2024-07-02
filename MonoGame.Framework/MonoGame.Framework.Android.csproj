@@ -1,7 +1,7 @@
-<Project Sdk="MSBuild.Sdk.Extras">
+<Project Sdk="MSBuild.Sdk.Extras/3.0.23">
 
   <PropertyGroup>
-    <TargetFramework>monoandroid90</TargetFramework>
+    <TargetFramework>monoandroid12.0</TargetFramework>
     <DefineConstants>ANDROID;GLES;STBSHARP_INTERNAL</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <MGOpenGL>GLES</MGOpenGL>
@@ -31,6 +31,7 @@
     <Compile Remove="Graphics\GraphicsAdapter.cs" />
     <Compile Remove="Graphics\OcclusionQuery.cs" />
     <Compile Remove="Input\Keyboard.cs" />
+    <Compile Remove="Audio\Xact\WaveBank.Default.cs" />
   </ItemGroup>
 
   <ItemGroup>

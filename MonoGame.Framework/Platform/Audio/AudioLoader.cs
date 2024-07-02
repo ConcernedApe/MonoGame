@@ -167,6 +167,7 @@ namespace Microsoft.Xna.Framework.Audio
             return audioData;
         }
 
+
         private static byte[] LoadWave(BinaryReader reader, out ALFormat format, out int frequency, out int channels, out int blockAlignment, out int bitsPerSample, out int samplesPerBlock, out int sampleCount)
         {
             byte[] audioData = null;
