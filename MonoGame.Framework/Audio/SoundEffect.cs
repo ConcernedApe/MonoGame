@@ -8,6 +8,8 @@ using System.IO;
 
 namespace Microsoft.Xna.Framework.Audio
 {
+
+#if DESKTOP_GL
     // Extremely hacky: Wraps an OggStream and returns its DynamicSoundEffectInstance.
     // Note: OggStreamSoundEffect piggy backs off of DynamicSoundEffectInstance's logic and does not support pooling.
     public class OggStreamSoundEffect : SoundEffect
@@ -53,6 +55,7 @@ namespace Microsoft.Xna.Framework.Audio
             base.Dispose(disposing);
         }
     }
+#endif
 
     /// <summary>Represents a loaded sound resource.</summary>
     /// <remarks>
@@ -92,6 +95,7 @@ namespace Microsoft.Xna.Framework.Audio
             if (_systemState != SoundSystemState.Initialized)
                 throw new NoAudioHardwareException("Audio has failed to initialize. Call SoundEffect.Initialize() before sound operation to get more specific errors.");
 
+#if DESKTOP_GL
             if (vorbis)
             {
                 // Decompress Ogg Vorbis as PCM and load into memory.
@@ -116,6 +120,7 @@ namespace Microsoft.Xna.Framework.Audio
                     return;
                 }
             }
+#endif
 
             /*
               The Stream object must point to the head of a valid PCM wave file. Also, this wave file must be in the RIFF bitstream format.

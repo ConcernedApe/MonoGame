@@ -14,26 +14,6 @@ namespace Microsoft.Xna.Framework.Audio
     {
         #region Public Properties
 
-        /// <summary>
-        /// This value has no effect on DynamicSoundEffectInstance, but can be used by the sound effect's data provider to handle looping.
-        /// </summary>
-        public override bool IsLooped
-        {
-            get
-            {
-                return _looped;
-            }
-
-            set
-            {
-                AssertNotDisposed();
-                _looped = value;
-
-                //if (value == true)
-                //throw new InvalidOperationException("IsLooped cannot be set true. Submit looped audio data to implement looping.");
-            }
-        }
-
         public override SoundState State
         {
             get

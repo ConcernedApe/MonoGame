@@ -172,7 +172,7 @@ namespace Microsoft.Xna.Framework.Audio
 
                 stream.Close();
 
-                if (!sound.IsDisposed && sound.IsLooped)
+                if (!sound.IsDisposed && sound.LoopCount > 0)
                     goto RESTART;
 
                 stop.Set();
