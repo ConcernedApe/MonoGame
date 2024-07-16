@@ -165,6 +165,24 @@ namespace MonoGame.Tools.Pipeline
             _project.LaunchDebugger = true;
         }
 
+        public void RemoveContent(string sourceFile)
+        {
+            if (sourceFile.Contains(";"))
+            {
+                var split = sourceFile.Split(';');
+                sourceFile = split[0];
+            }
+
+            // Make sure the source file is relative to the project.
+            var projectDir = ProjectDirectory + Path.DirectorySeparatorChar;
+            sourceFile = PathHelper.GetRelativePath(projectDir, sourceFile);
+
+            // Remove duplicates... keep this new one.
+            var previous = _project.ContentItems.FirstOrDefault(e => e.OriginalPath.Equals(sourceFile));
+            if (previous != null)
+                _project.ContentItems.Remove(previous);
+        }
+
         public bool AddContent(string sourceFile, bool skipDuplicates)
         {
             string link = null;
@@ -423,6 +441,39 @@ namespace MonoGame.Tools.Pipeline
             }
         }
 
+        private static List<string> GatherFiles(string sourceFilePath)
+        {
+            var files = new List<string>();
+
+            if (!sourceFilePath.Contains("*"))
+            {
+                files.Add(sourceFilePath);
+                return files;
+            }
+
+            string searchDir = null;
+            string searchPattern = null;
+            SearchOption searchOption = SearchOption.TopDirectoryOnly;
+
+            var wildcardDir = sourceFilePath.IndexOf("**");
+            if (wildcardDir != -1)
+            {
+                searchOption = SearchOption.AllDirectories;
+                searchDir = sourceFilePath.Remove(wildcardDir - 1);
+                searchPattern = Path.GetFileName(sourceFilePath);
+            }
+            else
+            {
+                searchPattern = Path.GetFileName(sourceFilePath);
+                searchDir = sourceFilePath.Replace(searchPattern, "");
+            }
+
+            var found = Directory.EnumerateFileSystemEntries(searchDir, searchPattern, searchOption);
+            files.AddRange(found);
+
+            return files;
+        }
+
         public void ImportProject(string projectFilePath)
         {
             _project.OriginalPath = projectFilePath.Remove(projectFilePath.LastIndexOf('.')) + ".mgcb";
@@ -448,35 +499,76 @@ namespace MonoGame.Tools.Pipeline
                         }
                         else if (buildAction.Equals("Content") || buildAction.Equals("None"))
                         {
-                            string include, copyToOutputDirectory;
-                            ReadIncludeContent(io, out include, out copyToOutputDirectory);
-
-                            if (!string.IsNullOrEmpty(copyToOutputDirectory) && !copyToOutputDirectory.Equals("Never"))
+                            // Look for removal.
+                            var remove = io.GetAttribute("Remove").Unescape();
+                            if (remove != null)
                             {
                                 var sourceFilePath = Path.GetDirectoryName(projectFilePath);
-                                sourceFilePath += "\\" + include;
+                                sourceFilePath += "\\" + remove;
 
-                                OnCopy(sourceFilePath);
+                                var found = GatherFiles(sourceFilePath);
+                                foreach (var f in found)
+                                    RemoveContent(f);
+                            }
+                            else
+                            {
+                                string include, copyToOutputDirectory;
+                                ReadIncludeContent(io, out include, out copyToOutputDirectory);
+
+                                if (string.IsNullOrEmpty(include))
+                                    continue;
+
+                                if (!string.IsNullOrEmpty(copyToOutputDirectory) && !copyToOutputDirectory.Equals("Never"))
+                                {
+                                    var sourceFilePath = Path.GetDirectoryName(projectFilePath);
+                                    sourceFilePath += "\\" + include;
+
+                                    var found = GatherFiles(sourceFilePath);
+                                    foreach (var f in found)
+                                        OnCopy(f);
+                                }
                             }
                         }
                         else if (buildAction.Equals("Compile"))
                         {
-                            string include, name, importer, processor;
-                            string[] processorParams;
-                            ReadIncludeCompile(io, out include, out name, out importer, out processor, out processorParams);
-
-                            Importer = importer;
-                            Processor = processor;
-                            if (processorParams != null)
+                            // Look for removal.
+                            var remove = io.GetAttribute("Remove").Unescape();
+                            if (remove != null)
                             {
-                                foreach (var i in processorParams)
-                                    AddProcessorParam(i);
+                                var sourceFilePath = Path.GetDirectoryName(projectFilePath);
+                                sourceFilePath += "\\" + remove;
+
+                                var found = GatherFiles(sourceFilePath);
+                                foreach (var f in found)
+                                    RemoveContent(f);
                             }
+                            else
+                            {
+                                string include, name, importer, processor;
+                                string[] processorParams;
+                                ReadIncludeCompile(io, out include, out name, out importer, out processor, out processorParams);
 
-                            var sourceFilePath = Path.GetDirectoryName(projectFilePath);
-                            sourceFilePath += "\\" + include;
+                                if (string.IsNullOrEmpty(include))
+                                    continue;
 
-                            OnBuild(sourceFilePath);
+                                Importer = importer;
+                                Processor = processor;
+
+                                if (processorParams != null)
+                                {
+                                    foreach (var i in processorParams)
+                                        AddProcessorParam(i);
+                                }
+
+                                var sourceFilePath = Path.GetDirectoryName(projectFilePath);
+                                sourceFilePath += "\\" + include;
+
+                                var found = GatherFiles(sourceFilePath);
+                                foreach (var f in found)
+                                {
+                                    OnBuild(f);
+                                }
+                            }
                         }
                     }
                 }
@@ -544,14 +636,26 @@ namespace MonoGame.Tools.Pipeline
                                         out string processor,
                                         out string[] processorParams)
         {
+            include = null;
             name = null;
             importer = null;
             processor = null;
+            processorParams = null;
 
-            include = io.GetAttribute("Include").Unescape();
+            var remove = io.GetAttribute("Remove");
+            if (remove != null)
+                return;
+
+            include = (io.GetAttribute("Include") ?? io.GetAttribute("Update")).Unescape();
             var parameters = new List<string>();
 
-            if (!io.IsEmptyElement)
+            if (io.IsEmptyElement)
+            {
+                name = io.GetAttribute("Name").Unescape();
+                importer = io.GetAttribute("Importer").Unescape();
+                processor = io.GetAttribute("Processor").Unescape();
+            }
+            else
             {
                 var depth = io.Depth;
                 for (io.Read(); io.Depth != depth; io.Read())
