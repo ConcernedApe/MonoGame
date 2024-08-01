@@ -230,6 +230,12 @@ namespace Microsoft.Xna.Framework.Graphics
 #if GLES
             // TODO: check for for non renderable formats (formats that can't be attached to FBO)
 
+            // This could be called during the Draw, so get the currently
+            // bound frame buffer to restore.
+            int lastFrameBuffer;
+            GL.GetInteger(GetPName.FramebufferBinding, out lastFrameBuffer);
+            GraphicsExtensions.CheckGLError();
+
             var framebufferId = 0;
             GL.GenFramebuffers(1, out framebufferId);
             GraphicsExtensions.CheckGLError();
@@ -241,6 +247,13 @@ namespace Microsoft.Xna.Framework.Graphics
             GL.ReadPixels(rect.X, rect.Y, rect.Width, rect.Height, this.glFormat, this.glType, data);
             GraphicsExtensions.CheckGLError();
             GL.DeleteFramebuffers(1, ref framebufferId);
+
+            // Restore the last frame buffer if we had one.
+            if (lastFrameBuffer != 0)
+            {
+                GL.BindFramebuffer(FramebufferTarget.Framebuffer, lastFrameBuffer);
+                GraphicsExtensions.CheckGLError();
+            }
 #else
             var tSizeInByte = ReflectionHelpers.SizeOf<T>.Get();
             GL.BindTexture(TextureTarget.Texture2D, this.glTexture);
