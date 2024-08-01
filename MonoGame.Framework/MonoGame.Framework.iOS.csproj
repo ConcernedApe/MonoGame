@@ -1,14 +1,15 @@
-<Project Sdk="MSBuild.Sdk.Extras/3.0.23">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>xamarinios10</TargetFramework>
+	<TargetFramework>net8.0-ios</TargetFramework>
     <DefineConstants>IOS;GLES;STBSHARP_INTERNAL</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <MGOpenGL>GLES</MGOpenGL>
-    <Description>The MonoGame runtime for iOS which supports iOS Versions 10 and above. </Description>
+    <Description>The MonoGame runtime for iOS amd iPadOS. </Description>
     <PackageTags>monogame;.net core;core;.net standard;standard;ios</PackageTags>
     <PackageId>MonoGame.Framework.iOS</PackageId>
     <AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
+    <SupportedOSPlatformVersion>11.2</SupportedOSPlatformVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -34,6 +35,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="Platform\Audio\AudioLoader.ADPCM.cs" />
+    <Compile Include="Platform\Audio\AudioLoader.cs" />
     <Compile Include="Platform\iOS\Devices\Sensors\Accelerometer.cs" />
     <Compile Include="Platform\iOS\Devices\Sensors\Compass.cs" />
     <Compile Include="Platform\iOS\iOSGamePlatform.cs" />
