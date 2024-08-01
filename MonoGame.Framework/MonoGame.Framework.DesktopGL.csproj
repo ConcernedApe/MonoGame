@@ -35,6 +35,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Audio\Xact\WaveBank.Default.cs" />
     <Compile Remove="Graphics\GraphicsAdapter.cs" />
     <Compile Remove="Media\Video.cs" />
     <Compile Remove="Media\VideoPlayer.cs" />
