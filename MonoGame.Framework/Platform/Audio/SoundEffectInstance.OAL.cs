@@ -664,7 +664,7 @@ namespace Microsoft.Xna.Framework.Audio
 
         private void QueueBuffers()
         {
-            if (!HasSourceId || !HasBufferIds || BufferFinished || BuffersAvailable is null)
+            if (!HasSourceId || !HasBufferIds || BufferFinished || BuffersAvailable == null)
                 return;
 
             int availableCount = BuffersAvailable.Length;

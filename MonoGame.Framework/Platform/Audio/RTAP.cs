@@ -381,7 +381,7 @@ namespace RTAudioProcessing
             if (RiverPtr == IntPtr.Zero)
                 return;
 
-            RTAP.rtap_river_set_spring(RiverPtr, ((spring is null) ? IntPtr.Zero : spring.SpringPtr));
+            RTAP.rtap_river_set_spring(RiverPtr, ((spring == null) ? IntPtr.Zero : spring.SpringPtr));
 
             Spring = spring;
         }

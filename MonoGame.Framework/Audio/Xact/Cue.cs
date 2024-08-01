@@ -57,9 +57,9 @@ namespace Microsoft.Xna.Framework.Audio
                 if (!_pitchControlledByRPC.HasValue)
                 {
                     XactSoundBankSound sound = _currentXactSound;
-                    if (sound is null && _xactSounds.Count > 0)
+                    if (sound == null && _xactSounds.Count > 0)
                         sound = _xactSounds[0]; // if there's no sound playing, take the first one on the assumption that either (a) there's only one, or (b) they're all configured similarly
-                    if (sound is null)
+                    if (sound == null)
                         return false;
 
                     var curves = sound.rpcCurves;

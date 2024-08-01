@@ -43,7 +43,7 @@ namespace Microsoft.Xna.Framework.Audio
         {
             lock (singletonMutex)
             {
-                if (!(instance is null))
+                if (!(instance == null))
                     throw new InvalidOperationException("Already running");
 
                 running = true;
