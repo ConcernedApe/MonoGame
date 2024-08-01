@@ -733,7 +733,6 @@ namespace Microsoft.Xna.Framework.Audio
             }
 
             // The RPC filter overrides the randomized track filter.
-#if FAUDIO
             if (_soundEffect.IsFilterEnabled())
             {
                 // 9/7/2021 ARTHUR: Previously, if a filterless sound effect had an RPC curve with Frequency defined,
@@ -748,7 +747,6 @@ namespace Microsoft.Xna.Framework.Audio
                         _rpcFilterFrequency.HasValue ? _rpcFilterFrequency.Value : _soundEffect._filterFrequency);
                 }
             }
-#endif
         }
         
         /// <summary>
