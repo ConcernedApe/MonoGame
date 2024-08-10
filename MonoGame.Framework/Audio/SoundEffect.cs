@@ -9,7 +9,7 @@ using System.IO;
 namespace Microsoft.Xna.Framework.Audio
 {
 
-#if DESKTOP_GL
+#if DESKTOPGL
     // Extremely hacky: Wraps an OggStream and returns its DynamicSoundEffectInstance.
     // Note: OggStreamSoundEffect piggy backs off of DynamicSoundEffectInstance's logic and does not support pooling.
     public class OggStreamSoundEffect : SoundEffect
@@ -95,7 +95,7 @@ namespace Microsoft.Xna.Framework.Audio
             if (_systemState != SoundSystemState.Initialized)
                 throw new NoAudioHardwareException("Audio has failed to initialize. Call SoundEffect.Initialize() before sound operation to get more specific errors.");
 
-#if DESKTOP_GL
+#if DESKTOPGL
             if (vorbis)
             {
                 // Decompress Ogg Vorbis as PCM and load into memory.
