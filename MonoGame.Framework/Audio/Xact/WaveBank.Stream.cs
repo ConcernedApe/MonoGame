@@ -19,8 +19,6 @@ namespace Microsoft.Xna.Framework.Audio
             int channels, rate, alignment;
             DecodeFormat(info.Format, out codec, out channels, out rate, out alignment);
 
-            // TEMP FIX:  Just decode the whole thing at once.
-
             var length = info.FileLength;
             var buffer = new byte[length];
 
@@ -31,13 +29,10 @@ namespace Microsoft.Xna.Framework.Audio
                 stream.Read(buffer, 0, length);
             }
 
-            if (codec == MiniFormatTag.Adpcm)
-            {
-                var blockAlignment = (alignment + 22) * channels; // This is how XACT encodes it!
-                buffer = AudioLoader.ConvertMsAdpcmToPcm(buffer, 0, buffer.Length, (int)channels, blockAlignment);
-            }
+            // Our alternate OAL implementation in Stardew will decode the ADPCM audio
+            // as it is played removing the decode overhead here.
+            var sound = new SoundEffect(codec, buffer, channels, rate, alignment, info.LoopStart, info.LoopLength);
 
-            var sound = new SoundEffect(buffer, 0, buffer.Length, rate, (AudioChannels)channels, 0, 0);
             var inst = sound.CreateInstance();
             inst._isXAct = true;
             return inst;
