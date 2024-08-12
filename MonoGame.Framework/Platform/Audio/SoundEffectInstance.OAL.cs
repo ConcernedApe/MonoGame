@@ -676,14 +676,6 @@ namespace Microsoft.Xna.Framework.Audio
             }
 
             BuffersAvailable = null;
-
-            var alState = AL.GetSourceState(SourceId);
-            ALHelper.CheckError("Failed to get source state.");
-            if (alState == ALSourceState.Stopped)
-            {
-                AL.SourcePlay(SourceId);
-                ALHelper.CheckError("Failed to play.");
-            }
         }
 
         private void PlatformUpdateQueue()
@@ -702,6 +694,14 @@ namespace Microsoft.Xna.Framework.Audio
             }
 
             QueueBuffers();
+
+            var alState = AL.GetSourceState(SourceId);
+            ALHelper.CheckError("Failed to get source state.");
+            if (alState == ALSourceState.Stopped)
+            {
+                AL.SourcePlay(SourceId);
+                ALHelper.CheckError("Failed to play.");
+            }
         }
     }
 }
