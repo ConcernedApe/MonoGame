@@ -45,12 +45,14 @@ namespace Microsoft.Xna.Framework.Audio
             DecodeFormat(info.Format, out codec, out channels, out rate, out alignment);
 
             int bufferSize;
+            int wrapBufferSize = 0;
             var msadpcm = codec == MiniFormatTag.Adpcm;
             if (msadpcm)
             {
                 alignment = (alignment + 22) * channels;
                 int samplesPerBlock = ((alignment * 2) / channels) - 12;
                 bufferSize = (rate / samplesPerBlock) * alignment;
+                wrapBufferSize = info.FileLength % bufferSize;
             }
             else
             {
@@ -110,6 +112,7 @@ namespace Microsoft.Xna.Framework.Audio
 
             var thread = new Thread(() =>
             {
+                int timesPlayed = 0;
                 var start = _playRegionOffset + info.FileOffset;
 
                 var bindex = 0;
@@ -120,6 +123,7 @@ namespace Microsoft.Xna.Framework.Audio
                     new byte[bufferSize],
                     new byte[bufferSize],
                 };
+                var wrapBuffer = new byte[wrapBufferSize];
 
             RESTART:
 
@@ -145,10 +149,16 @@ namespace Microsoft.Xna.Framework.Audio
                 {
                     while (queue.Count < 3 && length > 0)
                     {
-                        var buffer = buffers[bindex];
-                        bindex = (bindex + 1) % 4;
+                        var buffer = wrapBuffer;
 
                         var read = Math.Min(bufferSize, length);
+
+                        if (read == bufferSize)
+                        {
+                            buffer = buffers[bindex];
+                            bindex = (bindex + 1) % 4;
+                        }
+
                         read = stream.Read(buffer, 0, read);
                         length -= read;
                         queue.Enqueue(buffer);
@@ -167,7 +177,7 @@ namespace Microsoft.Xna.Framework.Audio
 
                 stream.Close();
 
-                if (!sound.IsDisposed && sound.LoopCount > 0)
+                if (!sound.IsDisposed && (sound.LoopCount >= 255 || (timesPlayed++) < sound.LoopCount))
                     goto RESTART;
 
                 stop.Set();
