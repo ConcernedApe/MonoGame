@@ -237,8 +237,12 @@ namespace Microsoft.Xna.Framework.Audio
 #elif IOS
                 AVAudioSession.SharedInstance().Init();
 
-                // NOTE: Do not override AVAudioSessionCategory set by the game developer:
-                //       see https://github.com/MonoGame/MonoGame/issues/6595
+                // SICKHEAD:  This allows other apps like YouTube, Spotify, Podcasts, etc to play
+                // audio and mix with our game audio.
+                //
+                // The alternative disables other apps from playing audio over the game.
+                //
+                AVAudioSession.SharedInstance().SetCategory(AVAudioSessionCategory.Ambient);
 
                 EventHandler<AVAudioSessionInterruptionEventArgs> handler = delegate(object sender, AVAudioSessionInterruptionEventArgs e) {
                     switch (e.InterruptionType)
