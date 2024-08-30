@@ -359,7 +359,7 @@ namespace Microsoft.Xna.Framework.Audio
 
                 // This flag must be unset, or else the sound effect will not be pooled correctly.
                 _soundEffect._isXAct = false;
-                if (!_soundEffect._isPooled)
+                if (!_soundEffect._isPooled && !(_soundEffect is OggStreamSoundEffectInstance))
                     _soundEffect.Dispose();
                 _soundEffect = null;
             }
@@ -419,7 +419,7 @@ namespace Microsoft.Xna.Framework.Audio
 
                     // This flag must be unset, or else the sound effect will not be pooled correctly.
                     _soundEffect._isXAct = false;
-                    if (!_soundEffect._isPooled)
+                    if (!_soundEffect._isPooled && !(_soundEffect is OggStreamSoundEffectInstance))
                         _soundEffect.Dispose();
                     _soundEffect = null;
                 }

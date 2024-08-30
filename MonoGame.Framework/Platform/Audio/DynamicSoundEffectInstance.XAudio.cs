@@ -11,7 +11,7 @@ using SharpDX.XAudio2;
 
 namespace Microsoft.Xna.Framework.Audio
 {
-    public sealed partial class DynamicSoundEffectInstance : SoundEffectInstance
+    public partial class DynamicSoundEffectInstance : SoundEffectInstance
     {
         private Queue<AudioBuffer> _queuedBuffers;
         private Queue<byte[]> _pooledBuffers;

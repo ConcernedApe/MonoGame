@@ -143,7 +143,7 @@ namespace Microsoft.Xna.Framework.Audio
         {
             Reader = new VorbisReader(oggFileName);
 
-            _instance = new DynamicSoundEffectInstance(Reader.SampleRate, (Reader.Channels == 1) ? AudioChannels.Mono : AudioChannels.Stereo);
+            _instance = new OggStreamSoundEffectInstance(Reader.SampleRate, (Reader.Channels == 1) ? AudioChannels.Mono : AudioChannels.Stereo);
 
             _instance.BufferNeeded += (s, e) => { SubmitBuffer(); };
 

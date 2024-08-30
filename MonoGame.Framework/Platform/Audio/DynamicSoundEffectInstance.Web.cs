@@ -6,7 +6,7 @@ using System;
 
 namespace Microsoft.Xna.Framework.Audio
 {
-    public sealed partial class DynamicSoundEffectInstance : SoundEffectInstance
+    public partial class DynamicSoundEffectInstance : SoundEffectInstance
     {
         private void PlatformCreate()
         {

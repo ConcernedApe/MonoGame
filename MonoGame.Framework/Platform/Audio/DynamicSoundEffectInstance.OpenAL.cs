@@ -8,7 +8,7 @@ using MonoGame.OpenAL;
 
 namespace Microsoft.Xna.Framework.Audio
 {
-    public sealed partial class DynamicSoundEffectInstance : SoundEffectInstance
+    public partial class DynamicSoundEffectInstance : SoundEffectInstance
     {
         private Queue<OALSoundBuffer> _queuedBuffers;
         private ALFormat _format;

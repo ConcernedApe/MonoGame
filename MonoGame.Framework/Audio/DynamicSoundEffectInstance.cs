@@ -7,6 +7,14 @@ using System.Collections.Generic;
 
 namespace Microsoft.Xna.Framework.Audio
 {
+    // Extremely hacky: Used by OggStreamSoundEffect to piggy back off of DynamicSoundEffectInstance's logic.
+    // Note: This class is used to avoid being disposed, since it is a non-pooled sound.
+    public class OggStreamSoundEffectInstance : DynamicSoundEffectInstance
+    {
+        public OggStreamSoundEffectInstance(int sampleRate, AudioChannels channels)
+            : base(sampleRate, channels) { }
+    }
+
     /// <summary>
     /// A <see cref="SoundEffectInstance"/> for which the audio buffer is provided by the game at run time.
     /// </summary>
