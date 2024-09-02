@@ -298,6 +298,8 @@ namespace Microsoft.Xna.Framework.Graphics
 
             width = other.width;
             height = other.height;
+            ActualWidth = other.ActualWidth;
+            ActualHeight = other.ActualHeight;
             /* copy over any other values as needed. */
             this.TexelWidth = other.TexelWidth;
             this.TexelHeight = other.TexelHeight;
