@@ -263,6 +263,8 @@ namespace Microsoft.Xna.Framework.Audio
                     AL.SourceStop(SourceId);
                     ALHelper.CheckError("Failed to stop source.");
 
+                    UnqueueProcessedBuffers();
+
                     // Reset the SendFilter to 0 if we are NOT using reverb since
                     // sources are recycled
                     if (OpenALSoundController.Efx.IsInitialized) // ARTHUR 6/11/2021: Switched over from OpenALSoundController.SupportsEfx for consistency with reverb binding (and because SupportEfx returns false for some reason).
@@ -678,11 +680,8 @@ namespace Microsoft.Xna.Framework.Audio
             BuffersAvailable = null;
         }
 
-        private void PlatformUpdateQueue()
+        private void UnqueueProcessedBuffers()
         {
-            if (!HasSourceId || !HasBufferIds)
-                return;
-
             int processed;
             AL.GetSource(SourceId, ALGetSourcei.BuffersProcessed, out processed);
             ALHelper.CheckError("Failed to fetch processed buffers.");
@@ -692,7 +691,14 @@ namespace Microsoft.Xna.Framework.Audio
                 BuffersAvailable = AL.SourceUnqueueBuffers(SourceId, processed);
                 ALHelper.CheckError("Failed to unqueue buffers.");
             }
+        }
 
+        private void PlatformUpdateQueue()
+        {
+            if (!HasSourceId || !HasBufferIds)
+                return;
+
+            UnqueueProcessedBuffers();
             QueueBuffers();
 
             var alState = AL.GetSourceState(SourceId);
