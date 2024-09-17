@@ -97,7 +97,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
                             var resized = new PixelBitmapContent<Vector4>(newSize, newSize);
                             BitmapContent.Copy(bmp, resized);
                         }
-                        else if (PackPowerOfTwo && !GraphicsUtil.IsPowerOfTwo(bmp.Width) || !GraphicsUtil.IsPowerOfTwo(bmp.Height))
+                        else if (PackPowerOfTwo && (!GraphicsUtil.IsPowerOfTwo(bmp.Width) || !GraphicsUtil.IsPowerOfTwo(bmp.Height)))
                         {
                             // On mobile if the texture is not power of two in size
                             // then place it in a power of two image and store the
