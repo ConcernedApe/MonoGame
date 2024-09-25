@@ -142,7 +142,15 @@ namespace Microsoft.Xna.Framework.Audio
         {
             AssertNotDisposed();
 
-            if (_state != SoundState.Playing)
+            if (_state == SoundState.Playing)
+                return;
+
+            if (_state == SoundState.Paused)
+            {
+                Resume();
+                return;
+            }
+
             {
                 // Ensure that the volume reflects master volume, which is done by the setter.
                 Volume = Volume;
@@ -177,7 +185,7 @@ namespace Microsoft.Xna.Framework.Audio
         {
             AssertNotDisposed();
 
-            if (_state != SoundState.Playing)
+            if (_state != SoundState.Playing && _state != SoundState.Paused)
             {
                 Volume = Volume;
 
