@@ -695,18 +695,21 @@ namespace Microsoft.Xna.Framework.Audio
 
         private void PlatformUpdateQueue()
         {
-            if (!HasSourceId || !HasBufferIds)
-                return;
-
-            UnqueueProcessedBuffers();
-            QueueBuffers();
-
-            var alState = AL.GetSourceState(SourceId);
-            ALHelper.CheckError("Failed to get source state.");
-            if (alState == ALSourceState.Stopped)
+            lock (sourceMutex)
             {
-                AL.SourcePlay(SourceId);
-                ALHelper.CheckError("Failed to play.");
+                if (!HasSourceId || !HasBufferIds)
+                    return;
+
+                UnqueueProcessedBuffers();
+                QueueBuffers();
+
+                var alState = AL.GetSourceState(SourceId);
+                ALHelper.CheckError("Failed to get source state.");
+                if (alState == ALSourceState.Stopped)
+                {
+                    AL.SourcePlay(SourceId);
+                    ALHelper.CheckError("Failed to play.");
+                }
             }
         }
     }
