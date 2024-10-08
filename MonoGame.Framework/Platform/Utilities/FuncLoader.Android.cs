@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework.Utilities
 {
-    internal class FuncLoader
+    public class FuncLoader
     {
         [DllImport("dl")]
         public static extern IntPtr dlopen(string path, int flags);
@@ -13,13 +13,25 @@ namespace MonoGame.Framework.Utilities
         [DllImport("dl")]
         public static extern IntPtr dlsym(IntPtr handle, string symbol);
 
+        [DllImport("dl")]
+        public static extern IntPtr dlerror();
+
         private const int RTLD_LAZY = 0x0001;
+
+        private static bool CheckDlError(IntPtr lib)
+        {
+            if (lib != IntPtr.Zero)
+                return false;
+
+            Console.WriteLine($"dlerror(): {Marshal.PtrToStringUTF8(dlerror())}");
+            return true;
+        }
 
         public static IntPtr LoadLibrary(string libname)
         {
             // Let the OS search for the library by default.
             IntPtr lib = dlopen(libname, RTLD_LAZY);
-            if (lib != IntPtr.Zero)
+            if (!CheckDlError(lib))
             {
                 Console.WriteLine("FuncLoader.LoadLibrary {0}", libname);
                 return lib;
@@ -30,7 +42,7 @@ namespace MonoGame.Framework.Utilities
             var nlibpath = Application.Context.ApplicationInfo.NativeLibraryDir;
             var libpath = Path.Combine(nlibpath, libname);
             lib = dlopen(libpath, RTLD_LAZY);
-            if (lib != IntPtr.Zero)
+            if (!CheckDlError(lib))
             {	
                 Console.WriteLine("FuncLoader.LoadLibrary {0}", libpath);
                 return lib;
