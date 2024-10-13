@@ -12,7 +12,7 @@ namespace Microsoft.Xna.Framework.Audio
 {
     partial class WaveBank
     {
-#if IOS
+#if IOS || ANDROID || DESKTOPGL
         private SoundEffectInstance PlatformCreateStream(StreamInfo info)
         {
             MiniFormatTag codec;
