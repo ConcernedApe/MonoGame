@@ -35,28 +35,37 @@ namespace Microsoft.Xna.Framework.Graphics
 
                 var tex = _textures[i];
 
-                GL.ActiveTexture(TextureUnit.Texture0 + i);
-                GraphicsExtensions.CheckGLError();
+                TextureTarget? bindTarget = null;
+                int bindTexture = 0;
 
                 // Clear the previous binding if the 
                 // target is different from the new one.
                 if (_targets[i] != 0 && (tex == null || _targets[i] != tex.glTarget))
                 {
-                    GL.BindTexture(_targets[i], 0);
+                    bindTarget = _targets[i];
+                    bindTexture = 0;
                     _targets[i] = 0;
-                    GraphicsExtensions.CheckGLError();
                 }
 
                 if (tex != null)
                 {
                     _targets[i] = tex.glTarget;
-                    GL.BindTexture(tex.glTarget, tex.glTexture);
-                    GraphicsExtensions.CheckGLError();
+                    bindTarget = tex.glTarget;
+                    bindTexture = tex.glTexture;
 
                     unchecked
                     {
                         _graphicsDevice._graphicsMetrics._textureCount++;
                     }
+                }
+
+                if (bindTarget.HasValue)
+                {
+                    GL.ActiveTexture(TextureUnit.Texture0 + i);
+                    GraphicsExtensions.CheckGLError();
+
+                    GL.BindTexture(bindTarget.Value, bindTexture);
+                    GraphicsExtensions.CheckGLError();
                 }
 
                 _dirty &= ~mask;
