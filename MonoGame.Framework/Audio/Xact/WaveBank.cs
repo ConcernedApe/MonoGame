@@ -284,7 +284,7 @@ namespace Microsoft.Xna.Framework.Audio
             IsPrepared = true;
         }
 
-        private void DecodeFormat(int format, out MiniFormatTag codec, out int channels, out int rate, out int alignment)
+        private void DecodeFormat(int format, out MiniFormatTag codec, out int channels, out int rate, out int alignment, out int bits)
         {
             if (_version == 1)
             {
@@ -303,7 +303,7 @@ namespace Microsoft.Xna.Framework.Audio
                 channels = (format >> (1)) & ((1 << 3) - 1);
                 rate = (format >> (1 + 3 + 1)) & ((1 << 18) - 1);
                 alignment = (format >> (1 + 3 + 1 + 18)) & ((1 << 8) - 1);
-                //bits = (format >> (1 + 3 + 1 + 18 + 8)) & ((1 << 1) - 1);
+                bits = (format >> (1 + 3 + 1 + 18 + 8)) & ((1 << 1) - 1);
 
                 /*} else if(wavebankheader.dwVersion == 23) { // I'm not 100% sure if the following is correct
                     // version 23:
@@ -340,8 +340,13 @@ namespace Microsoft.Xna.Framework.Audio
                 channels = (format >> (2)) & ((1 << 3) - 1);
                 rate = (format >> (2 + 3)) & ((1 << 18) - 1);
                 alignment = (format >> (2 + 3 + 18)) & ((1 << 8) - 1);
-                //bits = (info.Format >> (2 + 3 + 18 + 8)) & ((1 << 1) - 1);
+                bits = (format >> (2 + 3 + 18 + 8)) & ((1 << 1) - 1);
             }            
+        }
+
+        private void DecodeFormat(int format, out MiniFormatTag codec, out int channels, out int rate, out int alignment)
+        {
+            DecodeFormat(format, out codec, out channels, out rate, out alignment, out int _);
         }
 
         /// <param name="audioEngine">Instance of the AudioEngine to associate this wave bank with.</param>

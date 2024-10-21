@@ -45,6 +45,7 @@ namespace Microsoft.Xna.Framework.Audio
         /// </remarks>
         public static void UpdatePlayingInstances()
         {
+#if !OPENAL
             for (int i = _playingInstances.Count - 1; i >= 0; i--)
             {
                 var target = _playingInstances[i].Target as DynamicSoundEffectInstance;
@@ -58,6 +59,7 @@ namespace Microsoft.Xna.Framework.Audio
                     _playingInstances.RemoveAt(i);
                 }
             }
+#endif
         }
     }
 }

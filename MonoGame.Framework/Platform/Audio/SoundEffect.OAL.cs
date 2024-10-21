@@ -92,7 +92,7 @@ namespace Microsoft.Xna.Framework.Audio
             }
             SpringFormat = RtapToAlFormat(rtapFormat);
 
-            Spring = new RtapSpring(buffer, rtapFormat, sampleRate, 0);
+            Spring = new RtapSpring(buffer, rtapFormat, sampleRate, (sampleBits / 8) * (((int)channels) + 1));
         }
 
         private void PlatformInitializeIeeeFloat(byte[] buffer, int offset, int count, int sampleRate, AudioChannels channels, int loopStart, int loopLength)

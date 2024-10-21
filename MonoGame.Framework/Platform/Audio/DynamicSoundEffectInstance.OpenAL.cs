@@ -95,18 +95,34 @@ namespace Microsoft.Xna.Framework.Audio
             // Get a buffer
             OALSoundBuffer oalBuffer = new OALSoundBuffer();
 
-            // Bind the data
-            if (offset == 0)
-            {
-                oalBuffer.BindDataBuffer(buffer, _format, count, _sampleRate, _sampleAlignment);
-            }
-            else
+            byte[] offsetBuffer = buffer;
+
+            if (offset != 0)
             {
                 // BindDataBuffer does not support offset
-                var offsetBuffer = new byte[count];
+                offsetBuffer = new byte[count];
                 Array.Copy(buffer, offset, offsetBuffer, 0, count);
-                oalBuffer.BindDataBuffer(offsetBuffer, _format, count, _sampleRate, _sampleAlignment);
+                
             }
+
+            if (IsFilterEnabled())
+            {
+                switch (_format)
+                {
+                    case ALFormat.Mono8:
+                    case ALFormat.Stereo8:
+                        FilterBuffer8(offsetBuffer, (int)_channels, _sampleRate);
+                        break;
+
+                    case ALFormat.Mono16:
+                    case ALFormat.Stereo16:
+                        FilterBuffer16(offsetBuffer, (int)_channels, _sampleRate);
+                        break;
+                }
+            }
+
+            // Bind the data
+            oalBuffer.BindDataBuffer(offsetBuffer, _format, count, _sampleRate, _sampleAlignment);
 
             // Queue the buffer
             _queuedBuffers.Enqueue(oalBuffer);

@@ -72,7 +72,7 @@ namespace Microsoft.Xna.Framework.Audio
                     for (var x = 0; x < SoundEffectInstancePool._playingInstances.Count; ++x)
                     {
                         inst = SoundEffectInstancePool._playingInstances[x];
-                        if (inst.IsDisposed || inst.State != SoundState.Playing || inst._effect == null || inst._isDynamic)
+                        if (inst.IsDisposed || inst.State != SoundState.Playing || (inst._effect == null && !inst._isDynamic))
                             continue;
                         inst.UpdateQueue();
                     }

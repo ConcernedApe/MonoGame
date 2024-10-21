@@ -12,7 +12,15 @@ namespace Microsoft.Xna.Framework.Audio
     public partial class SoundEffectInstance : IDisposable
     {
         const int DefaultBufferCount = 3;
+#if IOS || ANDROID
+        // Stardew typically uses stereo sounds, but these are
+        // mixed down to mono to reduce the file size on mobile.
+        // As such, we cut the default buffer size in half so
+        // that the duration is still consistent with PC.
+        const int DefaultBufferSize = 1024 * 16;
+#else
         const int DefaultBufferSize = 1024 * 32;
+#endif
 
 		internal SoundState SoundState = SoundState.Stopped;
         private uint _loopCount;
@@ -562,30 +570,30 @@ namespace Microsoft.Xna.Framework.Audio
             }
 
             if (bytesPerSample == 1)
-                FilterBuffer8(channels);
+                FilterBuffer8(BufferData, channels, _effect.Spring.SampleRate);
             else
-                FilterBuffer16(channels);
+                FilterBuffer16(BufferData, channels, _effect.Spring.SampleRate);
         }
 
         const int FHIGH = (int)FilterMode.HighPass;
         const int FBAND = (int)FilterMode.BandPass;
         const int FLOW = (int)FilterMode.LowPass;
 
-        public unsafe void FilterBuffer8(int channels)
+        public unsafe void FilterBuffer8(byte[] bufferArray, int channels, int sampleRate)
         {
             // Adapted from https://vincentchoqueuse.github.io/personal_website/tutorials/digital_state_filter.html
-            float filterFrequency = Math.Min((float)(2.0f * Math.Sin(Math.PI * Math.Min(frequency / ((float)_effect.Spring.SampleRate), 0.5f))), 1.0f);
+            float filterFrequency = Math.Min((float)(2.0f * Math.Sin(Math.PI * Math.Min(frequency / ((float)sampleRate), 0.5f))), 1.0f);
             float oneOverQ = (float)(1.0f / filterQ);
 
             float* f = stackalloc float[3];
 
             int stereo = (channels != 0) ? 1 : 0;
 
-            int clipLength = DefaultBufferSize >> stereo;
+            int clipLength = (bufferArray.Length) >> stereo;
 
             int filterMode = (int)_filterMode;
 
-            fixed (byte* bufferPtr = BufferData)
+            fixed (byte* bufferPtr = bufferArray)
             {
                 for (int s = 0; s < clipLength; ++s)
                 {
@@ -617,21 +625,21 @@ namespace Microsoft.Xna.Framework.Audio
             }
         }
 
-        public unsafe void FilterBuffer16(int channels)
+        public unsafe void FilterBuffer16(byte[] bufferArray, int channels, int sampleRate)
         {
             // Adapted from https://vincentchoqueuse.github.io/personal_website/tutorials/digital_state_filter.html
-            float filterFrequency = Math.Min((float)(2.0f * Math.Sin(Math.PI * Math.Min(frequency / ((float)_effect.Spring.SampleRate), 0.5f))), 1.0f);
+            float filterFrequency = Math.Min((float)(2.0f * Math.Sin(Math.PI * Math.Min(frequency / ((float)sampleRate), 0.5f))), 1.0f);
             float oneOverQ = (float)(1.0f / filterQ);
 
             float* f = stackalloc float[3];
 
             int stereo = (channels != 0) ? 1 : 0;
 
-            int clipLength = DefaultBufferSize >> (stereo + 1);
+            int clipLength = (bufferArray.Length) >> (stereo + 1);
 
             int filterMode = (int)_filterMode;
 
-            fixed (byte* bufferPtr = BufferData)
+            fixed (byte* bufferPtr = bufferArray)
             {
                 for (int s = 0; s < clipLength; ++s)
                 {
