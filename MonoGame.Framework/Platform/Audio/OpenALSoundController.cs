@@ -471,14 +471,24 @@ namespace Microsoft.Xna.Framework.Audio
 #if ANDROID
         void Activity_Paused(object sender, EventArgs e)
         {
-            // Pause all currently playing sounds by pausing the mixer
-            Alc.DevicePause(_device);
+            lock (OpenALSoundEffectInstanceManager.pauseMutex)
+            {
+                OpenALSoundEffectInstanceManager.paused = true;
+
+                // Pause all currently playing sounds by pausing the mixer
+                Alc.DevicePause(_device);
+            }
         }
 
         void Activity_Resumed(object sender, EventArgs e)
         {
-            // Resume all sounds that were playing when the activity was paused
-            Alc.DeviceResume(_device);
+            lock (OpenALSoundEffectInstanceManager.pauseMutex)
+            {
+                OpenALSoundEffectInstanceManager.paused = false;
+
+                // Resume all sounds that were playing when the activity was paused
+                Alc.DeviceResume(_device);
+            }
         }
 #endif
     }

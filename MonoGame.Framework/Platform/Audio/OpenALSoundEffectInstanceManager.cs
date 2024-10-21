@@ -10,6 +10,10 @@ namespace Microsoft.Xna.Framework.Audio
 {
     internal class OpenALSoundEffectInstanceManager : IDisposable
     {
+        internal static bool paused = false;
+
+        internal static readonly object pauseMutex = new object();
+
         private static readonly object singletonMutex = new object();
 
         private static OpenALSoundEffectInstanceManager instance;
@@ -66,15 +70,22 @@ namespace Microsoft.Xna.Framework.Audio
                 Thread.Sleep(30);
                 if (!running)
                     break;
-                lock (SoundEffectInstancePool._locker)
+
+                lock (pauseMutex)
                 {
-                    SoundEffectInstance inst = null;                  
-                    for (var x = 0; x < SoundEffectInstancePool._playingInstances.Count; ++x)
+                    if (!paused)
                     {
-                        inst = SoundEffectInstancePool._playingInstances[x];
-                        if (inst.IsDisposed || inst.State != SoundState.Playing || (inst._effect == null && !inst._isDynamic))
-                            continue;
-                        inst.UpdateQueue();
+                        lock (SoundEffectInstancePool._locker)
+                        {
+                            SoundEffectInstance inst = null;                  
+                            for (var x = 0; x < SoundEffectInstancePool._playingInstances.Count; ++x)
+                            {
+                                inst = SoundEffectInstancePool._playingInstances[x];
+                                if (inst.IsDisposed || inst.State != SoundState.Playing || (inst._effect == null && !inst._isDynamic))
+                                    continue;
+                                inst.UpdateQueue();
+                            }
+                        }
                     }
                 }
             }
