@@ -13,7 +13,7 @@ namespace Microsoft.Xna.Framework.Audio
 {
     partial class WaveBank
     {
-#if IOS || DESKTOPGL
+#if IOS
         private SoundEffectInstance PlatformCreateStream(StreamInfo info)
         {
             MiniFormatTag codec;
@@ -38,7 +38,7 @@ namespace Microsoft.Xna.Framework.Audio
             inst._isXAct = true;
             return inst;
         }
-#elif ANDROID
+#elif ANDROID || DESKTOPGL
         private SoundEffectInstance PlatformCreateStream(StreamInfo info)
         {
             MiniFormatTag codec;
@@ -54,7 +54,6 @@ namespace Microsoft.Xna.Framework.Audio
                 alignment = (alignment + 22) * channels;
                 pcmAlignment = (channels + 1) * 2;
             }
-            int wrapBufferSize = info.FileLength % bufferSize;
 
             var sound = new DynamicSoundEffectInstance(false, pcmAlignment, rate, channels == 2 ? AudioChannels.Stereo : AudioChannels.Mono);
             sound._isXAct = true;
@@ -119,10 +118,8 @@ namespace Microsoft.Xna.Framework.Audio
                     new byte[bufferSize],
                     new byte[bufferSize],
                 };
-                byte[] wrapBuffer = new byte[wrapBufferSize];
 
-                int length = info.FileLength;
-                byte[] springBuffer = new byte[length];
+                byte[] springBuffer = new byte[info.FileLength];
 
                 using(Stream stream = TitleContainer.OpenStream(_waveBankFileName))
                 {
@@ -140,7 +137,7 @@ namespace Microsoft.Xna.Framework.Audio
                             curr += stream.Read(temp, 0, read);
                         }
                     }
-                    stream.Read(springBuffer, 0, length);
+                    stream.Read(springBuffer, 0, springBuffer.Length);
                 }
 
                 RtapFormat rtapFormat = RtapFormat.Mono8;
@@ -169,6 +166,10 @@ namespace Microsoft.Xna.Framework.Audio
                 river.SetSpring(spring);
 
                 springBuffer = null;
+
+                int length = spring.Length;
+
+                byte[] wrapBuffer = new byte[length % bufferSize];
 
 RESTART:
                 int bufferHead = 0;
