@@ -256,7 +256,8 @@ namespace Microsoft.Xna.Framework.Graphics
                 w = texture.Width * scale.X;
                 h = texture.Height * scale.Y;
                 _texCoordTL = Vector2.Zero;
-                _texCoordBR = Vector2.One;
+                _texCoordBR.X = texture.width * texture.TexelWidth;
+                _texCoordBR.Y = texture.height * texture.TexelHeight;
             }
 
             // Tuck in texture coordinates to avoid artifacts.
@@ -393,7 +394,8 @@ namespace Microsoft.Xna.Framework.Graphics
             else
             {
                 _texCoordTL = Vector2.Zero;
-                _texCoordBR = Vector2.One;
+                _texCoordBR.X = texture.width * texture.TexelWidth;
+                _texCoordBR.Y = texture.height * texture.TexelHeight;
                 
                 origin.X = origin.X * (float)destinationRectangle.Width  * texture.TexelWidth;
                 origin.Y = origin.Y * (float)destinationRectangle.Height * texture.TexelHeight;
@@ -486,7 +488,8 @@ namespace Microsoft.Xna.Framework.Graphics
             {
                 size = new Vector2(texture.width, texture.height);
                 _texCoordTL = Vector2.Zero;
-                _texCoordBR = Vector2.One;
+                _texCoordBR.X = texture.width * texture.TexelWidth;
+                _texCoordBR.Y = texture.height * texture.TexelHeight;
             }
 
             // Tuck in texture coordinates to avoid artifacts.
@@ -532,7 +535,8 @@ namespace Microsoft.Xna.Framework.Graphics
             else
             {
                 _texCoordTL = Vector2.Zero;
-                _texCoordBR = Vector2.One;
+                _texCoordBR.X = texture.width * texture.TexelWidth;
+                _texCoordBR.Y = texture.height * texture.TexelHeight;
             }
 
             // Tuck in texture coordinates to avoid artifacts.
@@ -572,7 +576,10 @@ namespace Microsoft.Xna.Framework.Graphics
                      texture.Height,
                      color,
                      Vector2.Zero,
-                     Vector2.One,
+                     new Vector2(
+                         texture.width * texture.TexelWidth,
+                         texture.height * texture.TexelHeight
+                     ),
                      0);
 
             FlushIfNeeded();
@@ -600,7 +607,10 @@ namespace Microsoft.Xna.Framework.Graphics
                      destinationRectangle.Height,
                      color,
                      Vector2.Zero,
-                     Vector2.One,
+                     new Vector2(
+                         texture.width * texture.TexelWidth,
+                         texture.height * texture.TexelHeight
+                     ),
                      0);
             
             FlushIfNeeded();
