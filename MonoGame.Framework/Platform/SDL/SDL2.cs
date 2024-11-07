@@ -1,4 +1,4 @@
-﻿// MonoGame - Copyright (C) The MonoGame Team
+﻿// MonoGame - Copyright (C) MonoGame Foundation, Inc
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
@@ -84,6 +84,9 @@ internal static class Sdl
         ClipboardUpdate = 0x900,
 
         DropFile = 0x1000,
+        DropText = 0x1001,
+        DropBegin = 0x1002,
+        DropComplete = 0x1003,
 
         AudioDeviceAdded = 0x1100,
         AudioDeviceRemoved = 0x1101,
@@ -124,6 +127,8 @@ internal static class Sdl
         public Joystick.DeviceEvent JoystickDevice;
         [FieldOffset(0)]
         public GameController.DeviceEvent ControllerDevice;
+        [FieldOffset(0)]
+        public Drop.Event Drop;
     }
 
     public struct Rectangle
@@ -210,7 +215,7 @@ internal static class Sdl
             {
                 return version.Major * 1_000_000 + version.Minor * 1000 + version.Patch;
             }
-        }        
+        }
     }
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -390,7 +395,6 @@ internal static class Sdl
             UiKit,
             Wayland,
             Mir,
-            WinRt,
             Android
         }
 
@@ -475,7 +479,7 @@ internal static class Sdl
 
         public static void SetTitle(IntPtr handle, string title)
         {
-            var bytes = Encoding.UTF8.GetBytes(title);
+            var bytes = Encoding.UTF8.GetBytes(title + '\0');
             SDL_SetWindowTitle(handle, ref bytes[0]);
         }
 
@@ -993,6 +997,14 @@ internal static class Sdl
         public static d_sdl_gamecontrolleraddmappingsfromrw AddMappingFromRw = FuncLoader.LoadFunction<d_sdl_gamecontrolleraddmappingsfromrw>(NativeLibrary, "SDL_GameControllerAddMappingsFromRW");
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        public delegate bool d_sdl_gamecontrollerhasbutton(IntPtr gamecontroller, Button button);
+        public static d_sdl_gamecontrollerhasbutton HasButton = FuncLoader.LoadFunction<d_sdl_gamecontrollerhasbutton>(NativeLibrary, "SDL_GameControllerHasButton");
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        public delegate bool d_sdl_gamecontrollerhasaxis(IntPtr gamecontroller, Axis axis);
+        public static d_sdl_gamecontrollerhasaxis HasAxis = FuncLoader.LoadFunction<d_sdl_gamecontrollerhasaxis>(NativeLibrary, "SDL_GameControllerHasAxis");
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void d_sdl_gamecontrollerclose(IntPtr gamecontroller);
         public static d_sdl_gamecontrollerclose Close = FuncLoader.LoadFunction<d_sdl_gamecontrollerclose>(NativeLibrary, "SDL_GameControllerClose");
 
@@ -1061,13 +1073,23 @@ internal static class Sdl
         {
             return InteropHelpers.Utf8ToString(SDL_GameControllerName(gamecontroller));
         }
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        public delegate int d_sdl_gamecontrollerrumble(IntPtr gamecontroller, ushort left, ushort right, uint duration);
+        public static d_sdl_gamecontrollerrumble Rumble = FuncLoader.LoadFunction<d_sdl_gamecontrollerrumble>(NativeLibrary, "SDL_GameControllerRumble");
+        public static d_sdl_gamecontrollerrumble RumbleTriggers = FuncLoader.LoadFunction<d_sdl_gamecontrollerrumble>(NativeLibrary, "SDL_GameControllerRumbleTriggers");
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        public delegate byte d_sdl_gamecontrollerhasrumble(IntPtr gamecontroller);
+        public static d_sdl_gamecontrollerhasrumble HasRumble = FuncLoader.LoadFunction<d_sdl_gamecontrollerhasrumble>(NativeLibrary, "SDL_GameControllerHasRumble");
+        public static d_sdl_gamecontrollerhasrumble HasRumbleTriggers = FuncLoader.LoadFunction<d_sdl_gamecontrollerhasrumble>(NativeLibrary, "SDL_GameControllerHasRumbleTriggers");
     }
 
     public static class Haptic
     {
-        // For some reason, different game controllers have different maximum value supported
-        // Also, the more the value is close to their limit, the more they tend to randomly ignore it
-        // Hence, we're setting an abitrary safe value as a maximum
+        // For some reason, different game controllers support different maximum values
+        // Also, the closer a given value is to the maximum, the more likely the value will be ignored
+        // Hence, we're setting an arbitrary safe value as a maximum
         public const uint Infinity = 1000000U;
 
         public enum EffectId : ushort
@@ -1178,5 +1200,21 @@ internal static class Sdl
         {
             GetError(SDL_HapticUpdateEffect(haptic, effect, ref data));
         }
+    }
+
+    public static class Drop
+    {
+        [StructLayout(LayoutKind.Sequential)]
+        public unsafe struct Event
+        {
+            public EventType Type;
+            public uint TimeStamp;
+            public IntPtr File;
+            public uint WindowId;
+        }
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        public unsafe delegate void d_sdl_free(IntPtr ptr);
+        public static d_sdl_free SDL_Free = FuncLoader.LoadFunction<d_sdl_free>(NativeLibrary, "SDL_free");
     }
 }
