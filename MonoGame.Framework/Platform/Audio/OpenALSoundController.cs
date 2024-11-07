@@ -226,12 +226,17 @@ namespace Microsoft.Xna.Framework.Audio
                 const int AlcFrequency = 0x1007;
                 const int AlcUpdateSize = 0x1014;
                 const int AlcUpdateBuffers = 0x1015;
+                const int AlcHrtfSoft = 0x1992;
+                const int AlcFalse = 0x0;
 
                 int[] attribute = new[]
                 {
                     AlcFrequency, frequency,
                     AlcUpdateSize, updateSize,
                     AlcUpdateBuffers, updateBuffers,
+#if DESKTOPGL
+                    AlcHrtfSoft, AlcFalse,
+#endif
                     0
                 };
 #elif IOS
