@@ -62,6 +62,8 @@ namespace Microsoft.Xna.Framework.Audio
         private bool _msadpcm;
         private bool _looped;
 
+        private readonly object _queueLocker = new object();
+
         #region Public Constructor
 
         /// <param name="sampleRate">Sample rate, in Hertz (Hz).</param>
@@ -213,7 +215,11 @@ namespace Microsoft.Xna.Framework.Audio
             {
                 DynamicSoundEffectInstanceManager.RemoveInstance(this);
 
-                PlatformStop();
+                lock (_queueLocker)
+                {
+                    PlatformStop();
+                }
+
                 _state = SoundState.Stopped;
 
                 SoundEffectInstancePool.Add(this);
@@ -270,7 +276,10 @@ namespace Microsoft.Xna.Framework.Audio
             if (offset % sampleSize != 0)
                 throw new ArgumentException("Offset into the buffer does not match format alignment.");
 
-            PlatformSubmitBuffer(buffer, offset, count);
+            lock (_queueLocker)
+            {
+                PlatformSubmitBuffer(buffer, offset, count);
+            }
         }
 
         #endregion
@@ -285,7 +294,10 @@ namespace Microsoft.Xna.Framework.Audio
 
         protected override void Dispose(bool disposing)
         {
-            PlatformDispose(disposing);
+            lock (_queueLocker)
+            {
+                PlatformDispose(disposing);
+            }
             base.Dispose(disposing);
         }
 
@@ -297,22 +309,25 @@ namespace Microsoft.Xna.Framework.Audio
 
         internal override void UpdateQueue()
         {
-            // Update the buffers
-            PlatformUpdateQueue();
-
-            // Raise the event
-            var bufferNeededHandler = BufferNeeded;
-
-            if (bufferNeededHandler != null)
+            lock (_queueLocker)
             {
-                var eventCount = (_buffersNeeded < 3) ? _buffersNeeded : 3;
-                for (var i = 0; i < eventCount; i++)
-                {
-                    bufferNeededHandler(this, EventArgs.Empty);
-                }
-            }
+                // Update the buffers
+                PlatformUpdateQueue();
 
-            _buffersNeeded = 0;
+                // Raise the event
+                var bufferNeededHandler = BufferNeeded;
+
+                if (bufferNeededHandler != null)
+                {
+                    var eventCount = (_buffersNeeded < 3) ? _buffersNeeded : 3;
+                    for (var i = 0; i < eventCount; i++)
+                    {
+                        bufferNeededHandler(this, EventArgs.Empty);
+                    }
+                }
+
+                _buffersNeeded = 0;
+            }
         }
 
         #endregion
