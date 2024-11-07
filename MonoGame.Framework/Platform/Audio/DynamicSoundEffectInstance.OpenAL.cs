@@ -42,7 +42,7 @@ namespace Microsoft.Xna.Framework.Audio
 
         private int PlatformGetPendingBufferCount()
         {
-            return _queuedBuffers.Count;
+            return _queuedBuffers?.Count ?? 0;
         }
 
         private void PlatformPlay()
@@ -83,10 +83,10 @@ namespace Microsoft.Xna.Framework.Audio
 
             // Remove all queued buffers
             AL.Source(SourceId, ALSourcei.Buffer, 0);
-            while (_queuedBuffers.Count > 0)
+            while (_queuedBuffers?.Count > 0)
             {
                 var buffer = _queuedBuffers.Dequeue();
-                buffer.Dispose();
+                buffer?.Dispose();
             }
         }
 
@@ -125,8 +125,11 @@ namespace Microsoft.Xna.Framework.Audio
             oalBuffer.BindDataBuffer(offsetBuffer, _format, count, _sampleRate, _sampleAlignment);
 
             // Queue the buffer
-            _queuedBuffers.Enqueue(oalBuffer);
-            AL.SourceQueueBuffer(SourceId, oalBuffer.OpenALDataBuffer);
+            if (_queuedBuffers != null)
+            {
+                _queuedBuffers.Enqueue(oalBuffer);
+                AL.SourceQueueBuffer(SourceId, oalBuffer.OpenALDataBuffer);
+            }
             ALHelper.CheckError();
 
             // If the source has run out of buffers, restart it
@@ -145,10 +148,10 @@ namespace Microsoft.Xna.Framework.Audio
 
             if (disposing)
             {
-                while (_queuedBuffers.Count > 0)
+                while (_queuedBuffers?.Count > 0)
                 {
                     var buffer = _queuedBuffers.Dequeue();
-                    buffer.Dispose();
+                    buffer?.Dispose();
                 }
 
                 DynamicSoundEffectInstanceManager.RemoveInstance(this);
@@ -170,8 +173,8 @@ namespace Microsoft.Xna.Framework.Audio
                 ALHelper.CheckError("Failed to unqueue buffers.");
                 for (int i = 0; i < numBuffers; i++)
                 {
-                    var buffer = _queuedBuffers.Dequeue();
-                    buffer.Dispose();
+                    var buffer = _queuedBuffers?.Dequeue();
+                    buffer?.Dispose();
                 }
             }
 
