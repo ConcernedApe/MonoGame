@@ -21,12 +21,15 @@ namespace Microsoft.Xna.Framework.Audio
 
         public static void AddInstance(SoundEffectInstance instance)
         {
+#if !OPENAL            
             var weakRef = new WeakReference(instance);
             _playingInstances.Add(weakRef);
+#endif
         }
 
         public static void RemoveInstance(SoundEffectInstance instance)
         {
+#if !OPENAL
             for (int i = _playingInstances.Count - 1; i >= 0; i--)
             {
                 if (_playingInstances[i].Target == instance)
@@ -35,6 +38,7 @@ namespace Microsoft.Xna.Framework.Audio
                     return;
                 }
             }
+#endif            
         }
 
         /// <summary>
