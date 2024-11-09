@@ -113,6 +113,7 @@ namespace Microsoft.Xna.Framework.Audio
         /// </summary>
         internal static void Update()
         {
+#if !OPENAL
             lock (_locker) {
 
             SoundEffectInstance inst = null;
@@ -144,6 +145,7 @@ namespace Microsoft.Xna.Framework.Audio
             }
 
             } // lock (_locker)
+#endif
         }
 
         /// <summary>

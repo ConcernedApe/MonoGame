@@ -41,7 +41,7 @@ namespace Microsoft.Xna.Framework.Audio
 
         private volatile bool running;
 
-        private readonly List<WeakReference> _playingInstances;
+        private readonly List<WeakReference> _threadLocalInstances = new List<WeakReference>();
 
         public OpenALSoundEffectInstanceManager()
         {
@@ -59,8 +59,7 @@ namespace Microsoft.Xna.Framework.Audio
                     IsBackground = true
                 };
                 underlyingThread.Start();
-            }
-            _playingInstances = new List<WeakReference>();
+            }   
         }
 
         public void Update()
@@ -77,52 +76,38 @@ namespace Microsoft.Xna.Framework.Audio
                     {
                         lock (SoundEffectInstancePool._locker)
                         {
-                            SoundEffectInstance inst = null;                  
-                            for (var x = 0; x < SoundEffectInstancePool._playingInstances.Count; ++x)
+                            _threadLocalInstances.Clear();
+                            foreach (SoundEffectInstance instance in SoundEffectInstancePool._playingInstances)
+                                _threadLocalInstances.Add(new WeakReference(instance));
+                        }
+
+                        SoundEffectInstance inst = null;                  
+                        for (var x = 0; x < _threadLocalInstances.Count; ++x)
+                        {
+                            inst = _threadLocalInstances[x]?.Target as SoundEffectInstance;
+                            if (inst.IsDisposed || inst.State != SoundState.Playing || (inst._effect == null && !inst._isDynamic))
                             {
-                                inst = SoundEffectInstancePool._playingInstances[x];
-                                if (inst.IsDisposed || inst.State != SoundState.Playing || (inst._effect == null && !inst._isDynamic))
+                                if (inst._isXAct)
                                     continue;
-                                inst.UpdateQueue();
+
+                                lock (SoundEffectInstancePool._locker)
+                                {
+                                    if (!inst.IsDisposed)
+                                    {
+                                        inst.Stop(true);
+
+                                        // dynamic sound effects already call SoundEffectInstancePool.Add(...)
+                                        if (inst._isDynamic)
+                                            continue;
+                                    }
+
+                                    SoundEffectInstancePool.Add(inst);
+                                }
+                                continue;
                             }
+                            inst.UpdateQueue();
                         }
                     }
-                }
-            }
-        }
-
-        public void AddInstance(SoundEffectInstance instance)
-        {
-            var weakRef = new WeakReference(instance);
-            _playingInstances.Add(weakRef);
-        }
-
-        public void RemoveInstance(SoundEffectInstance instance)
-        {
-            for (int i = _playingInstances.Count - 1; i >= 0; i--)
-            {
-                if (_playingInstances[i].Target == instance)
-                {
-                    _playingInstances.RemoveAt(i);
-                    return;
-                }
-            }
-        }
-
-        public void UpdatePlayingInstances()
-        {
-            for (int i = _playingInstances.Count - 1; i >= 0; i--)
-            {
-                var target = _playingInstances[i].Target as SoundEffectInstance;
-                if (target != null)
-                {
-                    if (!target.IsDisposed)
-                        target.UpdateQueue();
-                }
-                else
-                {
-                    // The instance has been disposed.
-                    _playingInstances.RemoveAt(i);
                 }
             }
         }
