@@ -39,7 +39,7 @@ namespace Microsoft.Xna.Framework.Audio
 
         public override SoundEffectInstance GetPooledInstance(bool forXAct)
         {
-            DynamicSoundEffectInstance sound = new OggStreamSoundEffectInstance(SampleRate, Channels);
+            DynamicSoundEffectInstance sound = new DynamicSoundEffectInstance(SampleRate, Channels);
             sound._isXAct = forXAct;
 
             var queue = new ConcurrentQueue<byte[]>();
