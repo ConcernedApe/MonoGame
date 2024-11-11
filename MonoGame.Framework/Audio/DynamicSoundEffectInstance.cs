@@ -297,8 +297,8 @@ namespace Microsoft.Xna.Framework.Audio
             lock (_queueLocker)
             {
                 PlatformDispose(disposing);
+                base.Dispose(disposing);
             }
-            base.Dispose(disposing);
         }
 
         private void CheckBufferCount()
@@ -311,6 +311,9 @@ namespace Microsoft.Xna.Framework.Audio
         {
             lock (_queueLocker)
             {
+                if (IsDisposed)
+                    return;
+
                 // Update the buffers
                 PlatformUpdateQueue();
 
