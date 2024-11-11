@@ -8,55 +8,6 @@ using System.IO;
 
 namespace Microsoft.Xna.Framework.Audio
 {
-
-#if DESKTOPGL
-    // Extremely hacky: Wraps an OggStream and returns its DynamicSoundEffectInstance.
-    // Note: OggStreamSoundEffect piggy backs off of DynamicSoundEffectInstance's logic and does not support pooling.
-    public class OggStreamSoundEffect : SoundEffect
-    {
-        protected OggStream _oggStream;
-
-        // OggStreamSoundEffect should only ever return one instance.
-        protected bool _returnedInstance = false;
-
-        public OggStreamSoundEffect(string filename)
-        {
-            _oggStream = new OggStream(filename);
-            _oggStream.Prepare();
-            _duration = _oggStream.Reader.TotalTime;
-        }
-
-        public override SoundEffectInstance GetPooledInstance(bool forXAct)
-        {
-            if (_returnedInstance)
-            {
-                return null;
-            }
-
-            _oggStream.Stop();
-            var instance = _oggStream.GetSoundEffectInstance();
-
-            instance._isXAct = forXAct;
-
-            _oggStream.SubmitBuffer();
-
-            return instance;
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (!_isDisposed)
-            {
-                _oggStream.Dispose();
-            }
-
-            _returnedInstance = false;
-
-            base.Dispose(disposing);
-        }
-    }
-#endif
-
     /// <summary>Represents a loaded sound resource.</summary>
     /// <remarks>
     /// <para>A SoundEffect represents the buffer used to hold audio data and metadata. SoundEffectInstances are used to play from SoundEffects. Multiple SoundEffectInstance objects can be created and played from the same SoundEffect object.</para>
