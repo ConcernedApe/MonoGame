@@ -1,3 +1,4 @@
+#if DESKTOPGL
 // MonoGame - Copyright (C) The MonoGame Team
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
@@ -10,8 +11,6 @@ using System.Threading;
 
 namespace Microsoft.Xna.Framework.Audio
 {
-
-#if DESKTOPGL
     public class OggStreamSoundEffect : SoundEffect
     {
         const int BufferSize = 1024 * 16;
@@ -159,6 +158,5 @@ namespace Microsoft.Xna.Framework.Audio
             return sound;
         }
     }
-#endif
-
 }
+#endif
