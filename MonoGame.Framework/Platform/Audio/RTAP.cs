@@ -1,3 +1,4 @@
+using MonoGame.Framework.Utilities;
 using System;
 using System.Runtime.InteropServices;
 
@@ -18,7 +19,62 @@ namespace RTAudioProcessing
         internal const int FLAG_16 = 1;
         internal const int FLAG_STEREO = 1 << 1;
         internal const int FLAG_ADPCM = 1 << 2;
+    }
 
+#if RTAP_NATIVE
+    internal static partial class RTAP
+    {
+        private static IntPtr NativeLibrary = GetNativeLibrary();
+
+        private static IntPtr GetNativeLibrary()
+        {
+#if DESKTOPGL
+            if (CurrentPlatform.OS == OS.Windows)
+                return FuncLoader.LoadLibraryExt("rtap.dll");
+#endif
+
+            return IntPtr.Zero;
+        }
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        internal unsafe delegate int d_rtap_alloc_size_for_spring();
+        internal static d_rtap_alloc_size_for_spring rtap_alloc_size_for_spring = FuncLoader.LoadFunction<d_rtap_alloc_size_for_spring>(NativeLibrary, "RTAP__RTAPSpring__alloc_size");
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        internal unsafe delegate int d_rtap_alloc_size_for_river();
+        internal static d_rtap_alloc_size_for_river rtap_alloc_size_for_river = FuncLoader.LoadFunction<d_rtap_alloc_size_for_river>(NativeLibrary, "RTAP__RTAPRiver__alloc_size");
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        internal unsafe delegate void d_rtap_spring_init(IntPtr _this, IntPtr data_ptr, int data_size, int format, int sample_rate, int block_align);
+        internal static d_rtap_spring_init rtap_spring_init = FuncLoader.LoadFunction<d_rtap_spring_init>(NativeLibrary, "RTAP__RTAPSpring__init");
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        internal unsafe delegate int d_rtap_spring_get_length(IntPtr _this);
+        internal static d_rtap_spring_get_length rtap_spring_get_length = FuncLoader.LoadFunction<d_rtap_spring_get_length>(NativeLibrary, "RTAP__RTAPSpring__get_length");
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        internal unsafe delegate double d_rtap_spring_get_duration(IntPtr _this);
+        internal static d_rtap_spring_get_duration rtap_spring_get_duration = FuncLoader.LoadFunction<d_rtap_spring_get_duration>(NativeLibrary, "RTAP__RTAPSpring__get_duration");
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        internal unsafe delegate void d_rtap_river_init(IntPtr _this, IntPtr spring_ptr);
+        internal static d_rtap_river_init rtap_river_init = FuncLoader.LoadFunction<d_rtap_river_init>(NativeLibrary, "RTAP__RTAPRiver__init");
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        internal unsafe delegate void d_rtap_river_reset(IntPtr _this);
+        internal static d_rtap_river_reset rtap_river_reset = FuncLoader.LoadFunction<d_rtap_river_reset>(NativeLibrary, "RTAP__RTAPRiver__reset");
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        internal unsafe delegate void d_rtap_river_set_spring(IntPtr _this, IntPtr spring_ptr);
+        internal static d_rtap_river_set_spring rtap_river_set_spring = FuncLoader.LoadFunction<d_rtap_river_set_spring>(NativeLibrary, "RTAP__RTAPRiver__set_spring");
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        internal unsafe delegate int d_rtap_river_read_into(IntPtr _this, IntPtr buffer_ptr, int start_idx, int length);
+        internal static d_rtap_river_read_into rtap_river_read_into = FuncLoader.LoadFunction<d_rtap_river_read_into>(NativeLibrary, "RTAP__RTAPRiver__read_into");
+    }
+#else
+    internal static partial class RTAP
+    {
         private static int ALLOC_SIZE_SPRING;
         private static int ALLOC_SIZE_RIVER;
 
@@ -280,6 +336,7 @@ namespace RTAudioProcessing
                 dest[i] = (byte)0x0;
         }
     }
+#endif
 
     public sealed class RtapSpring : IDisposable
     {

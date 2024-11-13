@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace RTAudioProcessing
 {
+#if !RTAP_NATIVE
     internal static partial class RTAP
     {
         private static int[] ADAPTATION_TABLE = new int[]
@@ -223,4 +224,5 @@ namespace RTAudioProcessing
             return dest_size;
         }
     }
+#endif
 }
