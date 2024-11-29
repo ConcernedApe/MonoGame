@@ -1,4 +1,4 @@
-﻿// MonoGame - Copyright (C) The MonoGame Team
+﻿// MonoGame - Copyright (C) MonoGame Foundation, Inc
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
@@ -42,6 +42,12 @@ namespace Microsoft.Xna.Framework
             Sdl.GL.SetAttribute(Sdl.GL.Attribute.DoubleBuffer, 1);
             Sdl.GL.SetAttribute(Sdl.GL.Attribute.ContextMajorVersion, 2);
             Sdl.GL.SetAttribute(Sdl.GL.Attribute.ContextMinorVersion, 1);
+
+            if (presentationParameters.MultiSampleCount > 0)
+            {
+                Sdl.GL.SetAttribute(Sdl.GL.Attribute.MultiSampleBuffers, 1);
+                Sdl.GL.SetAttribute(Sdl.GL.Attribute.MultiSampleSamples, presentationParameters.MultiSampleCount);
+            }
 
             ((SdlGameWindow)SdlGameWindow.Instance).CreateWindow();
         }

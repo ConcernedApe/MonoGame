@@ -1,4 +1,4 @@
-﻿// MonoGame - Copyright (C) The MonoGame Team
+﻿// MonoGame - Copyright (C) MonoGame Foundation, Inc
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
@@ -183,7 +183,7 @@ namespace MonoGame.Tests.Graphics
                     {
                         Directory.CreateDirectory(outputDirectory);
                         _writerThread.AddAction(() =>
-                            frame.Save(capturedPath));
+                            frame.Save(capturedPath, "Capture"));
                     }
                     noReference.Add(referencePath);
                     continue;
@@ -209,7 +209,7 @@ namespace MonoGame.Tests.Graphics
                 {
                     Directory.CreateDirectory(outputDirectory);
                     _writerThread.AddAction(() =>
-                        result.CapturedData.Save(result.CapturedImagePath));
+                        result.CapturedData.Save(result.CapturedImagePath, "Capture"));
                 }
 
                 if (result.SaveDiff)
@@ -314,7 +314,7 @@ namespace MonoGame.Tests.Graphics
         {
             var diff = CreateDiff(capture, reference);
             Normalize(diff);
-            diff.Save(outputPath);
+            diff.Save(outputPath, "Diff");
         }
         
         private static FramePixelData CreateDiff (FramePixelData a, FramePixelData b)

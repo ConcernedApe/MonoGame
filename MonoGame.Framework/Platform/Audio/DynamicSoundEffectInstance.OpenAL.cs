@@ -1,4 +1,4 @@
-﻿// MonoGame - Copyright (C) The MonoGame Team
+﻿// MonoGame - Copyright (C) MonoGame Foundation, Inc
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
@@ -89,9 +89,9 @@ namespace Microsoft.Xna.Framework.Audio
             }
 
             // Queue the buffer
+            _queuedBuffers.Enqueue(oalBuffer);
             AL.SourceQueueBuffer(SourceId, oalBuffer.OpenALDataBuffer);
             ALHelper.CheckError();
-            _queuedBuffers.Enqueue(oalBuffer);
 
             // If the source has run out of buffers, restart it
             var sourceState = AL.GetSourceState(SourceId);

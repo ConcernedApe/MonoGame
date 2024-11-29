@@ -38,7 +38,7 @@ namespace MonoGame.Framework.Utilities
         public static IntPtr LoadLibraryExt(string libname)
         {
             var ret = IntPtr.Zero;
-            var assemblyLocation = Path.GetDirectoryName(typeof(FuncLoader).Assembly.Location) ?? "./";
+            var assemblyLocation = Path.GetDirectoryName(System.AppContext.BaseDirectory) ?? "./";
 
             // Try .NET Framework / mono locations
             if (CurrentPlatform.OS == OS.MacOSX)
@@ -64,6 +64,11 @@ namespace MonoGame.Framework.Utilities
             // Try current folder (.NET Core will copy it there after publish)
             if (ret == IntPtr.Zero)
                 ret = LoadLibrary(Path.Combine(assemblyLocation, libname));
+
+            // Try alternate way of checking current folder
+            // assemblyLocation is null if we are inside macOS app bundle
+            if (ret == IntPtr.Zero)
+                ret = LoadLibrary(Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, libname));
 
             // Try loading system library
             if (ret == IntPtr.Zero)

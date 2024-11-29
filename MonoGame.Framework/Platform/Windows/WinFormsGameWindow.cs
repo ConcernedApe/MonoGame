@@ -1,4 +1,4 @@
-﻿// MonoGame - Copyright (C) The MonoGame Team
+﻿// MonoGame - Copyright (C) MonoGame Foundation, Inc
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
@@ -162,6 +162,7 @@ namespace MonoGame.Framework
             _resizeTickTimer = new System.Timers.Timer(1) { SynchronizingObject = Form, AutoReset = false };
             _resizeTickTimer.Elapsed += OnResizeTick;
 
+            Form.FormClosing += OnFormClosing;
             Form.Activated += OnActivated;
             Form.Deactivate += OnDeactivate;
             Form.Resize += OnResize;
@@ -189,6 +190,9 @@ namespace MonoGame.Framework
         
         [DllImport("user32.dll", ExactSpelling=true, CharSet=CharSet.Auto)]
         internal static extern int MapWindowPoints(HandleRef hWndFrom, HandleRef hWndTo, out POINTSTRUCT pt, int cPoints);
+
+        [DllImport("shell32.dll")]
+        private static extern void DragAcceptFiles(IntPtr hwnd, bool fAccept);
 
         private void SetIcon()
         {
@@ -234,10 +238,18 @@ namespace MonoGame.Framework
             }
         }
 
+        private void OnFormClosing(object sender, FormClosingEventArgs e)
+        {
+            e.Cancel = true;
+            _platform.Game.Exit();
+        }
+
         private void OnActivated(object sender, EventArgs eventArgs)
         {
             _platform.IsActive = true;
             Keyboard.SetActive(true);
+
+            DragAcceptFiles(Handle, true); //allows drag and dropping
         }
 
         private void OnDeactivate(object sender, EventArgs eventArgs)

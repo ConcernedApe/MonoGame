@@ -1,4 +1,4 @@
-// MonoGame - Copyright (C) The MonoGame Team
+// MonoGame - Copyright (C) MonoGame Foundation, Inc
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
@@ -10,6 +10,7 @@ using System.Runtime.InteropServices;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoGame.Framework.Utilities;
+using System.Text;
 
 namespace Microsoft.Xna.Framework
 {
@@ -26,6 +27,8 @@ namespace Microsoft.Xna.Framework
         private int _isExiting;
         private SdlGameWindow _view;
 
+        private readonly List<string> _dropList;
+
         public SdlGamePlatform(Game game)
             : base(game)
         {
@@ -33,21 +36,18 @@ namespace Microsoft.Xna.Framework
             _keys = new List<Keys>();
             Keyboard.SetKeys(_keys);
 
-            Sdl.Version sversion;
-            Sdl.GetVersion(out sversion);
+            Sdl.GetVersion(out Sdl.version);
 
-            Sdl.Major = sversion.Major;
-            Sdl.Minor = sversion.Minor;
-            Sdl.Patch = sversion.Patch;
+            var minVersion = new Sdl.Version() { Major = 2, Minor = 0, Patch = 5 };
 
-            var version = 100 * Sdl.Major + 10 * Sdl.Minor + Sdl.Patch;
-
-            if (version <= 204)
-                Debug.WriteLine("Please use SDL 2.0.5 or higher.");
+            if (Sdl.version < minVersion)
+                Debug.WriteLine("Please use SDL " + minVersion + " or higher.");
 
             // Needed so VS can debug the project on Windows
-            if (version >= 205 && CurrentPlatform.OS == OS.Windows && Debugger.IsAttached)
+            if (Sdl.version >= minVersion && CurrentPlatform.OS == OS.Windows && Debugger.IsAttached)
                 Sdl.SetHint("SDL_WINDOWS_DISABLE_THREAD_NAMING", "1");
+
+            _dropList = new List<string>();
 
             Sdl.Init((int)(
                 Sdl.InitFlags.Video |
@@ -93,9 +93,25 @@ namespace Microsoft.Xna.Framework
                 Threading.Run();
                 GraphicsDevice.DisposeContexts();
 
-                if (_isExiting > 0)
+                if (_isExiting > 0 && ShouldExit())
+                {
                     break;
+                }
+                else
+                {
+                    _isExiting = 0;
+                }
             }
+        }
+
+        private bool ShouldExit()
+        {
+            if(_keys.Contains(Keys.F4) && (_keys.Contains(Keys.LeftAlt) || _keys.Contains(Keys.RightAlt)))
+            {
+                return Window.AllowAltF4;
+            }
+
+            return true;
         }
 
         private void SdlRunLoop()
@@ -107,10 +123,10 @@ namespace Microsoft.Xna.Framework
                 switch (ev.Type)
                 {
                     case Sdl.EventType.Quit:
-                        _isExiting++;
+                        Game.Exit();
                         break;
                     case Sdl.EventType.JoyDeviceAdded:
-                        Joystick.AddDevice(ev.JoystickDevice.Which);
+                        Joystick.AddDevices();
                         break;
                     case Sdl.EventType.JoyDeviceRemoved:
                         Joystick.RemoveDevice(ev.JoystickDevice.Which);
@@ -127,10 +143,6 @@ namespace Microsoft.Xna.Framework
                         const int wheelDelta = 120;
                         Mouse.ScrollY += ev.Wheel.Y * wheelDelta;
                         Mouse.ScrollX += ev.Wheel.X * wheelDelta;
-                        break;
-                    case Sdl.EventType.MouseMotion:
-                        Window.MouseState.X = ev.Motion.X;
-                        Window.MouseState.Y = ev.Motion.Y;
                         break;
                     case Sdl.EventType.KeyDown:
                     {
@@ -156,7 +168,7 @@ namespace Microsoft.Xna.Framework
                             int len = 0;
                             int utf8character = 0; // using an int to encode multibyte characters longer than 2 bytes
                             byte currentByte = 0;
-                            int charByteSize = 0; // UTF8 char lenght to decode
+                            int charByteSize = 0; // UTF8 char length to decode
                             int remainingShift = 0;
                             unsafe
                             {
@@ -207,6 +219,12 @@ namespace Microsoft.Xna.Framework
                         break;
                     case Sdl.EventType.WindowEvent:
 
+                        // If the ID is not the same as our main window ID
+                        // that means that we received an event from the
+                        // dummy window, so don't process the event.
+                        if (ev.Window.WindowID != _view.Id)
+                            break;
+
                         switch (ev.Window.EventID)
                         {
                             case Sdl.Window.EventId.Resized:
@@ -223,9 +241,31 @@ namespace Microsoft.Xna.Framework
                                 _view.Moved();
                                 break;
                             case Sdl.Window.EventId.Close:
-                                _isExiting++;
+                                Game.Exit();
                                 break;
                         }
+                        break;
+
+                    case Sdl.EventType.DropFile:
+                        if (ev.Drop.WindowId != _view.Id)
+                            break;
+
+                        string path = InteropHelpers.Utf8ToString(ev.Drop.File);
+                        Sdl.Drop.SDL_Free(ev.Drop.File);
+                        _dropList.Add(path);
+
+                        break;
+
+                    case Sdl.EventType.DropComplete:
+                        if (ev.Drop.WindowId != _view.Id)
+                            break;
+
+                        if (_dropList.Count > 0)
+                        {
+                            _view.OnFileDrop(new FileDropEventArgs(_dropList.ToArray()));
+                            _dropList.Clear();
+                        }
+
                         break;
                 }
             }
