@@ -10,6 +10,9 @@
 [submodule "ThirdParty/StbImageWriteSharp"]
 	path = ThirdParty/StbImageWriteSharp
 	url = https://github.com/StbSharp/StbImageWriteSharp.git
+[submodule "ThirdParty/NVorbis"]
+	path = ThirdParty/NVorbis
+	url = https://github.com/NVorbis/NVorbis.git
 [submodule "src/monogame/external/sdl2"]
 	path = native/monogame/external/sdl2
 	url = https://github.com/MonoGame/MonoGame.Library.SDL.git
