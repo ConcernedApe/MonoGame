@@ -71,7 +71,7 @@ internal static class Sdl
         ControllerButtonUp = 0x652,
         ControllerDeviceAdded = 0x653,
         ControllerDeviceRemoved = 0x654,
-        ControllerDeviceRemapped = 0x654,
+        ControllerDeviceRemapped = 0x655,
 
         FingerDown = 0x700,
         FingerUp = 0x701,
