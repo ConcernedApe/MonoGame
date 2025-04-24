@@ -176,6 +176,12 @@ namespace Microsoft.Xna.Framework.Input
         public bool HasVoiceSupport { get; internal set; }
 
         /// <summary>
+        /// Gets a value indicating whether the controller has a touchpad.
+        /// </summary>
+        /// <value><c>true</c> if it has a microphone; otherwise, <c>false</c>.</value>
+        public bool HasTouchPad { get; internal set; }
+
+        /// <summary>
         /// Gets the type of the controller.
         /// </summary>
         /// <value>A <see cref="GamePadType"/> representing the controller type..</value>
@@ -219,6 +225,7 @@ namespace Microsoft.Xna.Framework.Input
             eq &= (left.HasLeftVibrationMotor == right.HasLeftVibrationMotor);
             eq &= (left.HasRightVibrationMotor == right.HasRightVibrationMotor);
             eq &= (left.HasVoiceSupport == right.HasVoiceSupport);
+            eq &= (left.HasTouchPad == right.HasTouchPad);
             eq &= (left.GamePadType == right.GamePadType);
 
             return eq;
@@ -290,6 +297,7 @@ namespace Microsoft.Xna.Framework.Input
                 ", HasLeftVibrationMotor=" + HasLeftVibrationMotor +
                 ", HasRightVibrationMotor=" + HasRightVibrationMotor +
                 ", HasVoiceSupport=" + HasVoiceSupport +
+                ", HasTouchPad=" + HasTouchPad +
                 ", GamePadType=" + GamePadType +
                 "]";
         }

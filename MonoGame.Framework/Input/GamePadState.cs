@@ -55,6 +55,12 @@ namespace Microsoft.Xna.Framework.Input
         public GamePadTriggers Triggers { get; internal set; }
 
         /// <summary>
+        /// Gets a structure that indicates the position of the touchpad.
+        /// </summary>
+        /// <value>The thumbsticks position.</value>
+        public GamePadTouchPad[] TouchPads { get; internal set; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="T:Microsoft.Xna.Framework.Input.GamePadState"/> struct
         /// using the specified GamePadThumbSticks, GamePadTriggers, GamePadButtons, and GamePadDPad.
         /// </summary>
@@ -62,15 +68,30 @@ namespace Microsoft.Xna.Framework.Input
         /// <param name="triggers">Initial trigger state..</param>
         /// <param name="buttons">Initial button state.</param>
         /// <param name="dPad">Initial directional pad state.</param>
-        public GamePadState(GamePadThumbSticks thumbSticks, GamePadTriggers triggers, GamePadButtons buttons, GamePadDPad dPad) : this()
+        /// <param name="touchPad">Initial touchpad state.</param>
+        public GamePadState(GamePadThumbSticks thumbSticks, GamePadTriggers triggers, GamePadButtons buttons, GamePadDPad dPad, GamePadTouchPad[] touchPads) : this()
         {
             ThumbSticks = thumbSticks;
             Triggers = triggers;
             Buttons = buttons;
             DPad = dPad;
+            TouchPads = touchPads;
             IsConnected = true;
 
             PlatformConstruct();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="T:Microsoft.Xna.Framework.Input.GamePadState"/> struct
+        /// using the specified GamePadThumbSticks, GamePadTriggers, GamePadButtons, and GamePadDPad.
+        /// </summary>
+        /// <param name="thumbSticks">Initial thumbstick state.</param>
+        /// <param name="triggers">Initial trigger state..</param>
+        /// <param name="buttons">Initial button state.</param>
+        /// <param name="dPad">Initial directional pad state.</param>
+        public GamePadState(GamePadThumbSticks thumbSticks, GamePadTriggers triggers, GamePadButtons buttons, GamePadDPad dPad)
+            : this(thumbSticks, triggers, buttons, dPad, new GamePadTouchPad[0])
+        {
         }
 
         /// <summary>

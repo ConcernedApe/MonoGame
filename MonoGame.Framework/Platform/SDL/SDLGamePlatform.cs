@@ -120,6 +120,9 @@ namespace Microsoft.Xna.Framework
                     case Sdl.EventType.ControllerButtonUp:
                     case Sdl.EventType.ControllerButtonDown:
                     case Sdl.EventType.ControllerAxisMotion:
+                    case Sdl.EventType.ControllerTouchPadDown:
+                    case Sdl.EventType.ControllerTouchPadMotion:
+                    case Sdl.EventType.ControllerTouchPadUp:
                         GamePad.UpdatePacketInfo(ev.ControllerDevice.Which, ev.ControllerDevice.TimeStamp);
                         break;
                     case Sdl.EventType.MouseWheel:

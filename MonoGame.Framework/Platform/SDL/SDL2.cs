@@ -72,6 +72,9 @@ internal static class Sdl
         ControllerDeviceAdded = 0x653,
         ControllerDeviceRemoved = 0x654,
         ControllerDeviceRemapped = 0x655,
+        ControllerTouchPadDown = 0x656,
+        ControllerTouchPadMotion = 0x657,
+        ControllerTouchPadUp = 0x678,
 
         FingerDown = 0x700,
         FingerUp = 0x701,
@@ -1005,6 +1008,10 @@ internal static class Sdl
         public static d_sdl_gamecontrollerhasaxis HasAxis = FuncLoader.LoadFunction<d_sdl_gamecontrollerhasaxis>(NativeLibrary, "SDL_GameControllerHasAxis");
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        public delegate int d_sdl_gamecontrollergetnumtouchpads(IntPtr gamecontroller);
+        public static d_sdl_gamecontrollergetnumtouchpads GetNumTouchpads = FuncLoader.LoadFunction<d_sdl_gamecontrollergetnumtouchpads>(NativeLibrary, "SDL_GameControllerGetNumTouchpads");
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void d_sdl_gamecontrollerclose(IntPtr gamecontroller);
         public static d_sdl_gamecontrollerclose Close = FuncLoader.LoadFunction<d_sdl_gamecontrollerclose>(NativeLibrary, "SDL_GameControllerClose");
 
@@ -1032,6 +1039,36 @@ internal static class Sdl
         public static IntPtr GetJoystick(IntPtr gamecontroller)
         {
             return GetError(SDL_GameControllerGetJoystick(gamecontroller));
+        }
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        public delegate int d_sdl_gamecontrollergetnumtouchpadfingers(IntPtr gamecontroller, int touchpad);
+        public static d_sdl_gamecontrollergetnumtouchpadfingers GetNumTouchpadFingers = FuncLoader.LoadFunction<d_sdl_gamecontrollergetnumtouchpadfingers>(NativeLibrary, "SDL_GameControllerGetNumTouchpadFingers");
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        private unsafe delegate int d_sdl_gamecontrollergetouchpadfinger(IntPtr gamecontroller, int touchpad, int finger, byte* state, float* x, float* y, float* pressure);
+        private static d_sdl_gamecontrollergetouchpadfinger SDL_GameControllerGetTouchpadFinger = FuncLoader.LoadFunction<d_sdl_gamecontrollergetouchpadfinger>(NativeLibrary, "SDL_GameControllerGetTouchpadFinger");
+
+        public static int GetTouchpadFinger(IntPtr gamecontroller, int touchpad, int finger, out byte state, out float x, out float y, out float pressure)
+        {
+            int result;
+
+            byte tempState = 0;
+            float tempX = 0.0f;
+            float tempY = 0.0f;
+            float tempPressure = 0.0f;
+
+            unsafe
+            {
+                result = GetError(SDL_GameControllerGetTouchpadFinger(gamecontroller, touchpad, finger, &tempState, &tempX, &tempY, &tempPressure));
+            }
+
+            state = tempState;
+            x = tempX;
+            y = tempY;
+            pressure = tempPressure;
+
+            return result;
         }
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]

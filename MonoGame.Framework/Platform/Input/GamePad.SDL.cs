@@ -145,6 +145,7 @@ namespace Microsoft.Xna.Framework.Input
             caps.HasLeftYThumbStick = Sdl.GameController.HasAxis(gamecontroller, Sdl.GameController.Axis.LeftY);
             caps.HasRightXThumbStick = Sdl.GameController.HasAxis(gamecontroller, Sdl.GameController.Axis.RightX);
             caps.HasRightYThumbStick = Sdl.GameController.HasAxis(gamecontroller, Sdl.GameController.Axis.RightY);
+            caps.HasTouchPad = Sdl.GameController.GetNumTouchpads(gamecontroller) > 0;
 
             return caps;
         }
@@ -211,7 +212,24 @@ namespace Microsoft.Xna.Framework.Input
                     (Sdl.GameController.GetButton(gdevice, Sdl.GameController.Button.DpadRight) == 1) ? ButtonState.Pressed : ButtonState.Released
                 );
 
-            var ret = new GamePadState(thumbSticks, triggers, buttons, dPad);
+            int numTouchPads = Sdl.GameController.GetNumTouchpads(gdevice);
+            var touchPads = new GamePadTouchPad[numTouchPads];
+
+            for (int touchPadIdx = 0; touchPadIdx < numTouchPads; ++touchPadIdx)
+            {
+                int numFingers = Sdl.GameController.GetNumTouchpadFingers(gdevice, touchPadIdx);
+                var fingers = new FingerState[numFingers];
+
+                for (int fingerIdx = 0; fingerIdx < numFingers; ++fingerIdx)
+                {
+                    Sdl.GameController.GetTouchpadFinger(gdevice, touchPadIdx, fingerIdx, out byte state, out float x, out float y, out float _);
+                    fingers[fingerIdx] = new FingerState(new Vector2(x, y), state != 0);
+                }
+
+                touchPads[touchPadIdx] = new GamePadTouchPad(fingers);
+            }
+
+            var ret = new GamePadState(thumbSticks, triggers, buttons, dPad, touchPads);
             ret.PacketNumber = gamepadInfo.PacketNumber;
             return ret;
         }
