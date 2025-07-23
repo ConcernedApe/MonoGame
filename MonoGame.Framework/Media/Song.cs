@@ -13,6 +13,7 @@ namespace Microsoft.Xna.Framework.Media
     public sealed partial class Song : IEquatable<Song>, IDisposable
     {
         private string _name;
+        private string _filePath;
 	private int _playCount = 0;
         private TimeSpan _duration = TimeSpan.Zero;
         bool disposed;

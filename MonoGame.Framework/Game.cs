@@ -517,6 +517,7 @@ namespace Microsoft.Xna.Framework
 
             if (!IsActive && (InactiveSleepTime.TotalMilliseconds >= 1.0))
             {
+
                 System.Threading.Thread.Sleep((int)InactiveSleepTime.TotalMilliseconds);
             }
 
