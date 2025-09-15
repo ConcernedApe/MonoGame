@@ -13,3 +13,6 @@ url=https://github.com/NVorbis/NVorbis.git
 [submodule "ThirdParty/StbImageWriteSharp"]
 	path = ThirdParty/StbImageWriteSharp
 	url = https://github.com/StbSharp/StbImageWriteSharp.git
+[submodule "ThirdParty/SDL_GameControllerDB_2_0_10"]
+	path = ThirdParty/SDL_GameControllerDB_2_0_10
+	url = https://github.com/gabomdq/SDL_GameControllerDB.git
