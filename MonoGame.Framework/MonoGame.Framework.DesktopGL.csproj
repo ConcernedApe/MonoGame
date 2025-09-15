@@ -93,6 +93,9 @@
     <EmbeddedResource Include="..\ThirdParty\SDL_GameControllerDB\gamecontrollerdb.txt">
       <LogicalName>gamecontrollerdb.txt</LogicalName>
     </EmbeddedResource>
+    <EmbeddedResource Include="..\ThirdParty\SDL_GameControllerDB_2_0_10\gamecontrollerdb.txt">
+      <LogicalName>gamecontrollerdb_2_0_10.txt</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>

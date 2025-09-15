@@ -25,7 +25,13 @@ namespace Microsoft.Xna.Framework.Input
         /// </summary>
         public static void InitDatabase()
         {
-            using (var stream = ReflectionHelpers.GetAssembly(typeof(GamePad)).GetManifestResourceStream("gamecontrollerdb.txt"))
+            var newVersion = new Sdl.Version() { Major = 2, Minor = 0, Patch = 16 };
+
+            string databaseName = Sdl.version < newVersion
+                ? "gamecontrollerdb_2_0_10.txt"
+                : "gamecontrollerdb.txt";
+
+            using (var stream = ReflectionHelpers.GetAssembly(typeof(GamePad)).GetManifestResourceStream(databaseName))
             {
                 if (stream != null)
                 {
