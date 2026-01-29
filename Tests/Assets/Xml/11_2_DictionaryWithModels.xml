@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<XnaContent>
+  <Asset Type="System.Collections.Generic.Dictionary[System.String, ModelForDictionary]">
+    <Item>
+      <Key>meow</Key>
+      <Value>
+        <Price>999</Price>
+        <Value>3.14</Value>
+        <Name>Cat Sound</Name>
+      </Value>
+    </Item>
+    <Item>
+      <Key>kitty</Key>
+      <Value>
+        <Price>999999</Price>
+        <Value>123456.789</Value>
+        <Name>Actual Cat</Name>
+      </Value>
+    </Item>
+  </Asset>
+</XnaContent>

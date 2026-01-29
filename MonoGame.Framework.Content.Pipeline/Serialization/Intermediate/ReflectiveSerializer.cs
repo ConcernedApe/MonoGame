@@ -13,7 +13,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate
 {
     internal class ReflectiveSerializer : ContentTypeSerializer
     {
-        const BindingFlags _bindingFlags = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly;
+        const BindingFlags _bindingFlags = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance;// | BindingFlags.DeclaredOnly;
 
         private struct ElementInfo
         {
@@ -134,8 +134,11 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate
                     _elements.Add(info);                
             }
 
-            if (GenericCollectionHelper.IsGenericCollectionType(TargetType, false))
-                _collectionHelper = serializer.GetCollectionHelper(TargetType);
+            for (Type? checkType = TargetType; checkType != null && _collectionHelper == null; checkType = checkType!.BaseType)
+            {
+                if (GenericCollectionHelper.IsGenericCollectionType(checkType, false))
+                    _collectionHelper = serializer.GetCollectionHelper(checkType);
+            }
         }
 
         public override bool CanDeserializeIntoExistingObject
@@ -159,25 +162,36 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate
             }
 
             // First deserialize the base type.
-            if (_baseSerializer != null)
-                _baseSerializer.Deserialize(input, format, result);
+            // XmlReader can't go backwards, so we're actually checking the base type stuff anyways
+            // This wouldn't work more generally, but is fine for Stardew
+            //if (_baseSerializer != null)
+            //    _baseSerializer.Deserialize(input, format, result);
 
             // Now deserialize our own elements.
-            foreach (var info in _elements)
+            Dictionary<string, string> foundSoFar = new();
+            while (input.Xml.NodeType != XmlNodeType.EndElement && !input.Xml.IsEmptyElement)
             {
-                if (!info.Attribute.FlattenContent)
+                if (input.Xml.MoveToContent() != XmlNodeType.Element)
+                    continue;
+
+                if (input.Xml.Name == format.CollectionItemName)
                 {
-                    if (!input.MoveToElement(info.Attribute.ElementName))
-                    {
-                        // If the the element was optional then we can
-                        // safely skip it and continue.
-                        if (info.Attribute.Optional)
-                            continue;
-                        
-                        // We failed to find a required element.
-                        throw input.NewInvalidContentException(null, "The Xml element `{0}` is required, but element `{1}` was found at line {2}:{3}. Try changing the element order or adding missing elements.", info.Attribute.ElementName, input.Xml.Name, ((IXmlLineInfo)input.Xml).LineNumber, ((IXmlLineInfo)input.Xml).LinePosition);
-                    }
+                    break;
                 }
+
+                var info = _elements.FirstOrDefault(e => e.Attribute.ElementName == input.Xml.Name);
+                if (info.Attribute == null)
+                {
+                    throw input.NewInvalidContentException(null, "Unknown property? `{0}` at line {1}:{2}.", input.Xml.Name, ((IXmlLineInfo)input.Xml).LineNumber, ((IXmlLineInfo)input.Xml).LinePosition);
+                }
+
+                // Stardew doesn't use FlattenContent, so it isn't accounted for here
+
+                if (foundSoFar.ContainsKey(info.Attribute.ElementName))
+                {
+                    throw input.NewInvalidContentException(null, "Duplicate property `{0}` at line {1}:{2}, previously found at line {3}.", input.Xml.Name, ((IXmlLineInfo)input.Xml).LineNumber, ((IXmlLineInfo)input.Xml).LinePosition, foundSoFar[info.Attribute.ElementName]);
+                }
+                foundSoFar.Add(info.Attribute.ElementName, $"{((IXmlLineInfo)input.Xml).LineNumber}:{((IXmlLineInfo)input.Xml).LinePosition}");
 
                 if (info.Attribute.SharedResource)
                 {
@@ -194,6 +208,14 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate
                     var value = input.ReadObject<object>(info.Attribute, info.Serializer);
                     info.Setter(result, value);
                 }
+            }
+
+            foreach (var info in _elements)
+            {
+                if (foundSoFar.ContainsKey(info.Attribute.ElementName) || info.Attribute.Optional)
+                    continue;
+
+                throw input.NewInvalidContentException(null, "The property `{0}` is required, but was not found before the element end at line {1}:{2}", info.Attribute.ElementName, ((IXmlLineInfo)input.Xml).LineNumber, ((IXmlLineInfo)input.Xml).LinePosition);
             }
 
             if (_collectionHelper != null)

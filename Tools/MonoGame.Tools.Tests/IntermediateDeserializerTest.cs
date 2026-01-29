@@ -271,6 +271,22 @@ namespace MonoGame.Tests.ContentPipeline
         }
 
         [Test]
+        public void DictionaryWithModels()
+        {
+            DeserializeCompileAndLoad<Dictionary<string, ModelForDictionary>>("11_2_DictionaryWithModels.xml", dictionary =>
+            {
+                Assert.NotNull(dictionary);
+                Assert.AreEqual(2, dictionary.Count);
+                Assert.AreEqual(999, dictionary["meow"].Price);
+                Assert.AreEqual(3.14f, dictionary["meow"].Value);
+                Assert.AreEqual("Cat Sound", dictionary["meow"].Name);
+                Assert.AreEqual(999999, dictionary["kitty"].Price);
+                Assert.AreEqual(123456.789f, dictionary["kitty"].Value);
+                Assert.AreEqual("Actual Cat", dictionary["kitty"].Name);
+            });
+        }
+
+        [Test]
         public void MathTypes()
         {
             DeserializeCompileAndLoad<MathTypes>("12_MathTypes.xml", mathTypes =>

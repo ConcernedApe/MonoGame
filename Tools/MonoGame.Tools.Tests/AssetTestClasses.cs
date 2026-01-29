@@ -215,6 +215,15 @@ public class Dictionaries
 }
 #endregion
 
+#region DictionaryWithModels
+public class ModelForDictionary
+{
+    public string Name;
+    public int Price;
+    public float Value;
+}
+#endregion
+
 #region Primitive Types
 public class PrimitiveTypes
 {
