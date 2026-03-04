@@ -231,9 +231,13 @@ namespace Microsoft.Xna.Framework
 
             if (!_willBeFullScreen || _game.graphicsDeviceManager.HardwareModeSwitch)
             {
-                Sdl.Window.SetSize(Handle, clientWidth, clientHeight);
-                _width = clientWidth;
-                _height = clientHeight;
+                Sdl.Window.GetDrawableSize(Handle, out int renderWidth, out int renderHeight);
+                if (renderWidth != clientWidth || renderHeight != clientHeight)
+                {
+                    Sdl.Window.SetSize(Handle, clientWidth, clientHeight);
+                    _width = clientWidth;
+                    _height = clientHeight;
+                }
             }
             else
             {
