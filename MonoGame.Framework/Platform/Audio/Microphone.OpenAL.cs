@@ -24,6 +24,36 @@ namespace Microsoft.Xna.Framework.Audio
     /// </summary>
     public sealed partial class Microphone
     {
+#if NO_MICROPHONE
+        internal static void PopulateCaptureDevices()
+        {
+            // clear microphones
+            if (_allMicrophones != null)
+                _allMicrophones.Clear();
+            else
+                _allMicrophones = new List<Microphone>();
+        }
+
+        internal void PlatformStart()
+        {
+            throw new NotImplementedException();
+        }
+
+        internal void PlatformStop()
+        {
+            throw new NotImplementedException();
+        }
+
+        internal void Update()
+        {
+            throw new NotImplementedException();
+        }
+
+        internal int PlatformGetData(byte[] buffer, int offset, int count)
+        {
+            throw new NotImplementedException();
+        }
+#else
         private IntPtr _captureDevice = IntPtr.Zero;
 
         internal void CheckALCError(string operation)
@@ -162,6 +192,7 @@ namespace Microsoft.Xna.Framework.Audio
 
             return 0;
         }
+#endif
     }
 }
 #endif

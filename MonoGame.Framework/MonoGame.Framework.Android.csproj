@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net9.0-android35</TargetFramework>
-    <DefineConstants>ANDROID;GLES;STBSHARP_INTERNAL</DefineConstants>
+    <DefineConstants>ANDROID;GLES;STBSHARP_INTERNAL;NO_MICROPHONE</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <MGOpenGL>GLES</MGOpenGL>
     <Description>The MonoGame runtime for Android which supports Android 4.2 and newer.</Description>
