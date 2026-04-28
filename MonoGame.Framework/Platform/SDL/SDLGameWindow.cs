@@ -5,6 +5,7 @@
 using System;
 using System.IO;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoGame.Framework.Utilities;
@@ -167,6 +168,28 @@ namespace Microsoft.Xna.Framework
             Sdl.Window.SetResizable(_handle, _resizable);
 
             SetCursorVisible(_mouseVisible);
+
+            // if we are on Windows, apply system dark mode theme to window decorations
+            if (CurrentPlatform.OS == OS.Windows)
+            {
+                var info = new Sdl.Window.SDL_SysWMinfo();
+                if (Sdl.Window.GetWindowWMInfo(_handle, ref info) && info.subsystem == Sdl.Window.SysWMType.Windows)
+                {
+                    const int DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
+
+                    IntPtr hwnd = info.window;
+
+                    [DllImport("uxtheme.dll", EntryPoint = "#132")]
+                    static extern int ShouldAppUseDarkMode();
+                    int isDarkMode = ShouldAppUseDarkMode();
+
+                    [DllImport("dwmapi.dll", PreserveSig = true)]
+                    static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
+                    int hresult = DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, ref isDarkMode, Marshal.SizeOf(isDarkMode.GetType()));
+                    if (hresult != 0)
+                        throw Marshal.GetExceptionForHR(hresult);
+                }
+            }
         }
 
         ~SdlGameWindow()
