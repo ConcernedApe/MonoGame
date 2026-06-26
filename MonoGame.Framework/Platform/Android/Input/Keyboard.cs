@@ -52,10 +52,15 @@ namespace Microsoft.Xna.Framework.Input
 
         private static readonly IDictionary<Keycode, Keys> KeyMap = LoadKeyMap();
 
+        internal static bool TryGetKey(Keycode keyCode, out Keys key)
+        {
+            return KeyMap.TryGetValue(keyCode, out key) && key != Keys.None;
+        }
+
         internal static bool KeyDown(Keycode keyCode)
         {
             Keys key;
-            if (KeyMap.TryGetValue(keyCode, out key) && key != Keys.None)
+            if (TryGetKey(keyCode, out key))
             {
                 if (!keys.Contains(key))
                     keys.Add(key);
@@ -67,7 +72,7 @@ namespace Microsoft.Xna.Framework.Input
         internal static bool KeyUp(Keycode keyCode)
         {
             Keys key;
-            if (KeyMap.TryGetValue(keyCode, out key) && key != Keys.None)
+            if (TryGetKey(keyCode, out key))
             {
                 if (keys.Contains(key))
                     keys.Remove(key);

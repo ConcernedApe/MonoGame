@@ -134,7 +134,7 @@ namespace Microsoft.Xna.Framework
 	    /// </summary>
 		public event EventHandler<EventArgs> ScreenDeviceNameChanged;
 
-#if WINDOWS || WINDOWS_UAP || DESKTOPGL|| ANGLE
+#if WINDOWS || WINDOWS_UAP || DESKTOPGL || ANGLE || ANDROID
 
         /// <summary>
 		/// Use this event to user text input.
@@ -148,6 +148,9 @@ namespace Microsoft.Xna.Framework
 		public event EventHandler<TextInputEventArgs> TextInput;
 
         internal bool IsTextInputHandled { get { return TextInput != null; } }
+
+#endif
+#if WINDOWS || WINDOWS_UAP || DESKTOPGL || ANGLE
 
         /// <summary>
         /// Buffered keyboard KeyDown event.
@@ -228,7 +231,7 @@ namespace Microsoft.Xna.Framework
             EventHelpers.Raise(this, ScreenDeviceNameChanged, EventArgs.Empty);
 		}
 
-#if WINDOWS || WINDOWS_UAP || DESKTOPGL || ANGLE
+#if WINDOWS || WINDOWS_UAP || DESKTOPGL || ANGLE || ANDROID
 	    /// <summary>
 	    /// Called when the window receives text input. Raises the <see cref="TextInput"/> event.
 	    /// </summary>
@@ -238,6 +241,8 @@ namespace Microsoft.Xna.Framework
 		{
             EventHelpers.Raise(this, TextInput, e);
 		}
+#endif
+#if WINDOWS || WINDOWS_UAP || DESKTOPGL || ANGLE
         internal void OnKeyDown(InputKeyEventArgs e)
 	    {
             EventHelpers.Raise(this, KeyDown, e);

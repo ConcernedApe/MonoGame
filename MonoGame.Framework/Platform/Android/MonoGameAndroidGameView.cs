@@ -1156,6 +1156,8 @@ namespace Microsoft.Xna.Framework
                 return true;
 
             handled = Keyboard.KeyDown(keyCode);
+            if (IsTextInputSource(e))
+                EmitTextInput(keyCode, e);
 
             // we need to handle the Back key here because it doesnt work any other way
             if (keyCode == Keycode.Back)
@@ -1179,6 +1181,41 @@ namespace Microsoft.Xna.Framework
             }
 
             return handled;
+        }
+
+        private static bool IsTextInputSource(KeyEvent e)
+        {
+            if (!e.IsFromSource(InputSourceType.Keyboard))
+                return false;
+
+            return !e.IsFromSource(InputSourceType.Gamepad)
+                && !e.IsFromSource(InputSourceType.Joystick);
+        }
+
+        private void EmitTextInput(Keycode keyCode, KeyEvent e)
+        {
+            if (keyCode == Keycode.Del)
+            {
+                _gameWindow.OnTextInput('\b', Keys.Back);
+                return;
+            }
+
+            Keys key;
+            Keyboard.TryGetKey(keyCode, out key);
+
+            switch (key)
+            {
+                case Keys.Enter:
+                    _gameWindow.OnTextInput('\r', key);
+                    return;
+                case Keys.Tab:
+                    _gameWindow.OnTextInput('\t', key);
+                    return;
+            }
+
+            var unicodeChar = e.UnicodeChar;
+            if (unicodeChar > 0 && !char.IsControl((char)unicodeChar))
+                _gameWindow.OnTextInput((char)unicodeChar, key);
         }
 
         public override bool OnKeyUp(Keycode keyCode, KeyEvent e)

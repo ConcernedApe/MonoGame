@@ -7,6 +7,7 @@ using Android.Content;
 using Android.Content.PM;
 using Android.OS;
 using Android.Views;
+using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Input.Touch;
 using MonoGame.OpenGL;
 
@@ -191,6 +192,11 @@ namespace Microsoft.Xna.Framework
                 _clientBounds = bounds;
                 OnClientSizeChanged();
             }
+        }
+
+        internal void OnTextInput(char character, Keys key = Keys.None)
+        {
+            OnTextInput(new TextInputEventArgs(character, key));
         }
 
         public override bool AllowUserResizing
