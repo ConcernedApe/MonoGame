@@ -1013,7 +1013,12 @@ internal static class Sdl
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate int d_sdl_gamecontrollergetnumtouchpads(IntPtr gamecontroller);
-        public static d_sdl_gamecontrollergetnumtouchpads GetNumTouchpads = FuncLoader.LoadFunction<d_sdl_gamecontrollergetnumtouchpads>(NativeLibrary, "SDL_GameControllerGetNumTouchpads");
+        public static d_sdl_gamecontrollergetnumtouchpads SDL_GameControllerGetNumTouchpads = FuncLoader.LoadFunction<d_sdl_gamecontrollergetnumtouchpads>(NativeLibrary, "SDL_GameControllerGetNumTouchpads");
+
+        public static int GetNumTouchpads(IntPtr gamecontroller)
+        {
+            return SDL_GameControllerGetNumTouchpads?.Invoke(gamecontroller) ?? 0;
+        }
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void d_sdl_gamecontrollerclose(IntPtr gamecontroller);
