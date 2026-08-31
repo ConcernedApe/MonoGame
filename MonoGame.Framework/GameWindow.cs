@@ -103,6 +103,14 @@ namespace Microsoft.Xna.Framework
             }
         }
 
+        /// <summary>
+        /// Determines whether the system dark theme is in use.
+        /// </summary>
+        public virtual bool IsDarkMode
+        {
+            get { return false; }
+        }
+
         internal MouseState MouseState;
 	    internal TouchPanelState TouchPanelState;
 

@@ -83,6 +83,11 @@ namespace Microsoft.Xna.Framework
             }
         }
 
+        public override bool IsDarkMode
+        {
+            get { return _darkMode; }
+        }
+
         public static GameWindow Instance;
         public uint? Id;
         public bool IsFullScreen;
@@ -94,6 +99,7 @@ namespace Microsoft.Xna.Framework
         private string _screenDeviceName;
         private int _width, _height;
         private bool _wasMoved, _supressMoved;
+        private bool _darkMode;
 
         public SdlGameWindow(Game game)
         {
@@ -188,6 +194,8 @@ namespace Microsoft.Xna.Framework
                     int hresult = DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, ref isDarkMode, Marshal.SizeOf(isDarkMode.GetType()));
                     if (hresult != 0)
                         throw Marshal.GetExceptionForHR(hresult);
+
+                    _darkMode = isDarkMode > 0;
                 }
             }
         }
